@@ -1,0 +1,111 @@
+type EvaluationCreated @entity(immutable: true) {
+  id: Bytes!
+  IES_id: BigInt! # uint256
+  evaluation: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ImpactReportCreated @entity(immutable: true) {
+  id: Bytes!
+  projectHatId: BigInt! # uint256
+  reportHatId: BigInt! # uint256
+  proposalId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Initialized @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  treasury: Bytes! # address
+  governor: Bytes! # address
+  token: Bytes! # address
+  schemaUID: Bytes! # bytes32
+  topHatId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type MinimumDepositChanged @entity(immutable: true) {
+  id: Bytes!
+  minDeposit: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PoolFunded @entity(immutable: true) {
+  id: Bytes!
+  IES_id: BigInt! # uint256
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ProfileCreated @entity(immutable: true) {
+  id: Bytes!
+  IES_id: Bytes! # bytes32
+  hatId: BigInt! # uint256
+  name: String! # string
+  metadata: String! # string
+  owner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleAdminChanged @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  previousAdminRole: Bytes! # bytes32
+  newAdminRole: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleCreated @entity(immutable: true) {
+  id: Bytes!
+  projectHatid: BigInt! # uint256
+  reportHatId: BigInt! # uint256
+  roleHatId: BigInt! # uint256
+  wearers: [Bytes!]! # address[]
+  metadata: String! # string
+  imageURL: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleGranted @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleRevoked @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TreasuryUpdated @entity(immutable: true) {
+  id: Bytes!
+  treasury: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
