@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import sliceAddress from "@/utils";
 
 export interface ProjectCardProps {
+  id: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -18,6 +19,7 @@ export interface ProjectCardProps {
 }
 
 export default function ProjectCard({
+  id,
   title,
   description,
   imageUrl,
@@ -29,7 +31,7 @@ export default function ProjectCard({
   let addr = ens ? ens : sliceAddress(address);
 
   return (
-    <div className="w-[400px] rounded-[15px] bg-white cursor-pointer shadow-lg">
+    <div className="w-lg rounded-[15px] bg-white cursor-pointer shadow-lg">
       <AspectRatio ratio={18 / 9} className="bg-muted">
         <Image
           src={imageUrl || "https://picsum.photos/500/300"}
