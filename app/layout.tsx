@@ -9,7 +9,7 @@ import ContextProvider from "@/context";
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_APP_NAME!,
-  description: "public template to build dapps asap",
+  description: "IES is a protocol for creating impact attestation on-chain.",
 };
 
 export default function RootLayout({
