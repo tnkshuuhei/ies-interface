@@ -8,19 +8,9 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { fetchIPFSDATA, sliceAddress } from "@/utils";
-import { HatsMetadata } from "@/utils/types";
+import { HatsMetadata, ProjectCardProps } from "@/utils/types";
 
-export interface ProjectCardProps {
-  id: string;
-  IES_id: string;
-  hatId: any;
-  name: string;
-  metadata: string;
-  owner: string;
-  blockNumber: string;
-  blockTimestamp: string;
-  transactionHash: string;
-}
+
 
 export default function ProjectCard({
   id,

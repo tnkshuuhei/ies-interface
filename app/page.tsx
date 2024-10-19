@@ -3,7 +3,9 @@ import { useQuery, QueryClient } from "@tanstack/react-query";
 import { gql, request } from "graphql-request";
 import Link from "next/link";
 
-import ProjectCard, { ProjectCardProps } from "@/components/ProjectCard";
+import ProjectCard from "@/components/ProjectCard";
+
+import { ProjectCardProps } from "@/utils/types";
 
 const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT!;
 
