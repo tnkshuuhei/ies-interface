@@ -50,7 +50,11 @@ export default function ProjectDetailPage() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>$COMMONS</CardTitle>
-            <Link href="https://app.hatsprotocol.xyz/trees/11155111/614">
+            <a
+              href="https://app.hatsprotocol.xyz/trees/11155111/614"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button
                 variant="outline"
                 size="sm"
@@ -59,7 +63,7 @@ export default function ProjectDetailPage() {
                 <ExternalLink className="h-4 w-4" />
                 View on Hats tree
               </Button>
-            </Link>
+            </a>
           </div>
         </CardHeader>
         <CardContent>
