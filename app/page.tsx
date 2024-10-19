@@ -28,8 +28,6 @@ interface Profiles {
 }
 
 export default function Home() {
-  const queryClient = new QueryClient();
-
   const {
     data: profiles,
     isLoading: isLoadingProfiles,
@@ -46,7 +44,7 @@ export default function Home() {
     },
   });
 
-  console.log("profiles", profiles);
+  console.log("profiles", profiles?.profileCreateds);
 
   return (
     <main className="min-h-screen">

@@ -41,11 +41,10 @@ export default function ProjectCard({
   useEffect(() => {
     async function fetchProjectData() {
       const projectData: HatsMetadata = await fetchIPFSDATA(metadata);
-      console.log("projectData", projectData);
       setProjectData(projectData);
     }
     fetchProjectData();
-  }, []);
+  }, [metadata]);
 
   return (
     <div className="w-lg rounded-[15px] bg-white cursor-pointer shadow-lg">

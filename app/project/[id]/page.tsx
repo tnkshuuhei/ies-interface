@@ -1,6 +1,7 @@
 import React from "react";
 
 import { ExternalLink, FileText } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -60,7 +61,6 @@ export default function ProjectDetailPage() {
               </Button>
             </Link>
           </div>
-          
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -76,10 +76,12 @@ export default function ProjectDetailPage() {
             </div>
 
             <div className="aspect-video relative">
-              <img
+              <Image
                 src="https://picsum.photos/640/360"
                 alt="Project Overview"
                 className="rounded-lg object-cover w-full h-full"
+                width={640}
+                height={360}
               />
             </div>
 
