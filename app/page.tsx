@@ -1,56 +1,57 @@
 "use client";
+import { useQuery, QueryClient } from "@tanstack/react-query";
+import { gql, request } from "graphql-request";
 import Link from "next/link";
 
 import ProjectCard, { ProjectCardProps } from "@/components/ProjectCard";
 
-const mockData: ProjectCardProps[] = [
+const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT!;
+
+const query = gql`
   {
-    id: "1",
-    title: "Project 1",
-    description: "Description 1",
-    imageUrl: "https://picsum.photos/500/300",
-    address: "0x1234567890abcdef",
-    avatar: "https://picsum.photos/500/300",
-    ens: "project1.eth",
-    reportLength: 10,
-  },
-  {
-    id: "2",
-    title: "Project 2",
-    description: "Description 2",
-    imageUrl: "https://picsum.photos/500/300",
-    address: "0x1234567890abcdef",
-    avatar: "https://picsum.photos/500/300",
-    ens: "project2.eth",
-    reportLength: 20,
-  },
-  {
-    id: "3",
-    title: "Project 3",
-    description: "Description 3",
-    imageUrl: "https://picsum.photos/500/300",
-    address: "0x1234567890abcdef",
-    avatar: "https://picsum.photos/500/300",
-    ens: "project3.eth",
-    reportLength: 30,
-  },
-  {
-    id: "4",
-    title: "Project 4",
-    description: "Description 4",
-    imageUrl: "https://picsum.photos/500/300",
-    address: "0x1234567890abcdef",
-    avatar: "https://picsum.photos/500/300",
-    ens: "project4.eth",
-    reportLength: 40,
-  },
-];
+    profileCreateds(first: 12) {
+      id
+      IES_id
+      hatId
+      name
+      metadata
+      owner
+      blockNumber
+      blockTimestamp
+      transactionHash
+    }
+  }
+`;
+
+interface Profiles {
+  profileCreateds: ProjectCardProps[];
+}
 
 export default function Home() {
+  const queryClient = new QueryClient();
+
+  const {
+    data: profiles,
+    isLoading: isLoadingProfiles,
+    error: errorFetchingProfiles,
+  } = useQuery<Profiles>({
+    queryKey: ["profiles"],
+    async queryFn() {
+      try {
+        return await request(ENDPOINT, query);
+      } catch (error) {
+        console.error(error);
+        throw new Error("Error fetching profiles");
+      }
+    },
+  });
+
+  console.log("profiles", profiles);
+
   return (
     <main className="min-h-screen">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-12">
-        {mockData.map((project, index) => (
+        {profiles?.profileCreateds.map((project, index) => (
           <Link href={`/project/${project.id}`} key={index}>
             <ProjectCard key={index} {...project} />
           </Link>
