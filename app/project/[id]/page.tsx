@@ -177,7 +177,13 @@ export default function ProjectDetailPage({
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline">View All Reports</Button>
-          <Button>Create New Report</Button>
+          <Link
+            href={`/create/${data?.hatId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button>Create New Report</Button>
+          </Link>
         </CardFooter>
       </Card>
     </div>
