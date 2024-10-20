@@ -1,7 +1,11 @@
+"use client";
 import React from "react";
 
+import { useQuery } from "@tanstack/react-query";
+import { gql, request } from "graphql-request";
 import { ExternalLink, FileText } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +19,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+
+import { fetchIPFSDATA } from "@/utils";
+import { Profile, ProfileData } from "@/utils/types";
 
 const reports = [
   {
@@ -42,13 +49,60 @@ const reports = [
     type: "Strategy",
   },
 ];
-export default function ProjectDetailPage() {
+const query = gql`
+  query GetProfileCreated($id: ID!) {
+    profileCreated(id: $id) {
+      id
+      IES_id
+      hatId
+      name
+      metadata
+      owner
+      blockNumber
+      blockTimestamp
+      transactionHash
+    }
+  }
+`;
+const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT!;
+
+export default function ProjectDetailPage({
+  params,
+}: {
+  params: {
+    id: string;
+  };
+}) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async (): Promise<ProfileData> => {
+      try {
+        const res: Profile = await request(ENDPOINT, query, { id: params.id });
+
+        const metadata = res.profileCreated.metadata;
+        const data = await fetchIPFSDATA(metadata);
+        // add data to res.profileCreated
+
+        let newData: ProfileData;
+        newData = {
+          ...res.profileCreated,
+          hatsData: data,
+        };
+        return newData;
+      } catch (error) {
+        console.error(error);
+        throw new Error("Error fetching profile");
+      }
+    },
+    enabled: !!params.id,
+  });
+
   return (
     <div className="container mx-auto p-4">
       <Card className="w-full max-w-3xl mx-auto">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>$COMMONS</CardTitle>
+            <CardTitle>{data?.hatsData.data.name}</CardTitle>
             <a
               href="https://app.hatsprotocol.xyz/trees/11155111/614"
               target="_blank"
@@ -91,11 +145,7 @@ export default function ProjectDetailPage() {
             <div>
               <h3 className="text-lg font-semibold">Project Description</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                The Q2 2024 sales initiative focuses on expanding our market
-                reach through targeted digital marketing campaigns and the
-                launch of our new product line, EcoTech Solutions. This project
-                aims to capture a larger share of the eco-conscious consumer
-                market while maintaining our core customer base.
+                {data?.hatsData.data.description}
               </p>
             </div>
 
