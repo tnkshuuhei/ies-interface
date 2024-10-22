@@ -29,10 +29,20 @@ import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 
 import { useIES } from "@/hooks/useIES";
+import { readAsBase64 } from "@/utils";
 import { pinToPinata } from "@/utils/pinata";
 import { HatsMetadata, Project, projectSchema } from "@/utils/types";
 
-export default function Register() {
+// TODO: add form
+// TODO: encode data
+// TODO: approve voting tokens before creating a report
+export default function CreateReportPage({
+  params,
+}: {
+  params: {
+    id: string;
+  };
+}) {
   const [imageName, setImageName] = useState<string | null>(null);
   const [image, setImage] = useState<string | undefined>(undefined);
   const [file, setFile] = useState<File | undefined>(undefined);
@@ -48,16 +58,6 @@ export default function Register() {
     IsErrorRegistered,
   } = useIES();
 
-  const readAsBase64 = (file: File) => {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        resolve(reader.result as string);
-      };
-      reader.onerror = reject;
-    });
-  };
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const file: File | null = e.target.files[0];
