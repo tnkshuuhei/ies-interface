@@ -163,6 +163,8 @@ export default function Register({
       [account.address!, "0x06aa005386F53Ba7b980c61e0D067CaBc7602a62"],
       "first report",
       "ipfs://QmaUeuCCPvyViz8fBQM3BRuqsSPYPWYUAiD6Ai76q2P9ok",
+      "QmaUeuCCPvyViz8fBQM3BRuqsSPYPWYUAiD6Ai76q2P9ok", // report metadata
+      ["https://www.google.com"], 
       account.address!,
       [role1 as `0x${string}`]
     );

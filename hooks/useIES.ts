@@ -46,6 +46,8 @@ export function useIES() {
     contributors: `0x${string}`[],
     description: string,
     imageUrl: string,
+    reportMetadata: string,
+    links: string[],
     proposor: `0x${string}`,
     roleData: `0x${string}`[]
   ) {
@@ -59,6 +61,8 @@ export function useIES() {
           contributors,
           description,
           imageUrl,
+          reportMetadata,
+          links,
           proposor,
           roleData,
         ],
