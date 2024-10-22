@@ -1,4 +1,5 @@
 export function sliceAddress(address: string) {
+  if (typeof address !== "string") return "";
   return address.slice(0, 6) + "..." + address.slice(-4);
 }
 
