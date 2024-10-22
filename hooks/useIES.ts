@@ -8,6 +8,7 @@ import { Project } from "@/utils/types";
 export function useIES() {
   const { toast } = useToast();
   const { data: registerHash, writeContract: register } = useWriteContract();
+  const { data: reportHash, writeContract: createReport } = useWriteContract();
 
   function registerIES(
     data: Project,
@@ -40,6 +41,47 @@ export function useIES() {
     );
   }
 
+  function createImpactReport(
+    projectHatId: bigint,
+    contributors: `0x${string}`[],
+    description: string,
+    imageUrl: string,
+    proposor: `0x${string}`,
+    roleData: `0x${string}`[]
+  ) {
+    createReport(
+      {
+        abi: ies.abi,
+        address: ies.address,
+        functionName: "createReport",
+        args: [
+          projectHatId,
+          contributors,
+          description,
+          imageUrl,
+          proposor,
+          roleData,
+        ],
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Tx sent!",
+            description: "Transaction successfully sent",
+          });
+        },
+        onError: (e) => {
+          console.log(e.message);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: e.message,
+          });
+        },
+      }
+    );
+  }
+
   const {
     isLoading: isRegistering,
     isSuccess: isRegistered,
@@ -48,11 +90,24 @@ export function useIES() {
     hash: registerHash,
   });
 
+  const {
+    isLoading: isCreating,
+    isSuccess: isCreated,
+    isError: IsErrorCreated,
+  } = useWaitForTransactionReceipt({
+    hash: reportHash,
+  });
+
   return {
     registerIES,
     registerHash,
     isRegistering,
     isRegistered,
     IsErrorRegistered,
+    createImpactReport,
+    reportHash,
+    isCreating,
+    isCreated,
+    IsErrorCreated,
   };
 }
