@@ -1,4 +1,4 @@
-const address: `0x${string}` = "0x2a182404d188e0e079916d5a8789aec85839af61";
+const address: `0x${string}` = "0x66d95DB9258621211Fc220510356B74f5900A13d";
 const abi = [
   {
     inputs: [
@@ -7,7 +7,11 @@ const abi = [
       { internalType: "address", name: "_gonernor", type: "address" },
       { internalType: "address", name: "_token", type: "address" },
       { internalType: "address", name: "_eas", type: "address" },
-      { internalType: "address", name: "_schemaRegistry", type: "address" },
+      {
+        internalType: "address",
+        name: "_schemaRegistry",
+        type: "address",
+      },
       { internalType: "address", name: "_hats", type: "address" },
       { internalType: "string", name: "_imageURL", type: "string" },
       { internalType: "address", name: "_splitsToken", type: "address" },
@@ -35,7 +39,12 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "uint256", name: "id", type: "uint256" },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
       {
         indexed: true,
         internalType: "address",
@@ -130,7 +139,12 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "uint256", name: "id", type: "uint256" },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
       {
         indexed: false,
         internalType: "uint256",
@@ -144,14 +158,24 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "bytes32", name: "id", type: "bytes32" },
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "id",
+        type: "bytes32",
+      },
       {
         indexed: false,
         internalType: "uint256",
         name: "hatId",
         type: "uint256",
       },
-      { indexed: false, internalType: "string", name: "name", type: "string" },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
       {
         indexed: false,
         internalType: "string",
@@ -164,6 +188,12 @@ const abi = [
         name: "owner",
         type: "address",
       },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "imageURL",
+        type: "string",
+      },
     ],
     name: "ProfileCreated",
     type: "event",
@@ -171,7 +201,12 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "bytes32", name: "role", type: "bytes32" },
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "role",
+        type: "bytes32",
+      },
       {
         indexed: true,
         internalType: "bytes32",
@@ -234,7 +269,12 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "bytes32", name: "role", type: "bytes32" },
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "role",
+        type: "bytes32",
+      },
       {
         indexed: true,
         internalType: "address",
@@ -254,7 +294,12 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "bytes32", name: "role", type: "bytes32" },
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "role",
+        type: "bytes32",
+      },
       {
         indexed: true,
         internalType: "address",
@@ -301,9 +346,15 @@ const abi = [
   {
     inputs: [
       { internalType: "bytes32", name: "profileId", type: "bytes32" },
-      { internalType: "address[]", name: "contributors", type: "address[]" },
-      { internalType: "string", name: "proposal", type: "string" },
+      {
+        internalType: "address[]",
+        name: "contributors",
+        type: "address[]",
+      },
+      { internalType: "string", name: "description", type: "string" },
       { internalType: "string", name: "metadataUID", type: "string" },
+      { internalType: "address", name: "proposer", type: "address" },
+      { internalType: "string[]", name: "links", type: "string[]" },
     ],
     name: "attest",
     outputs: [
@@ -322,9 +373,15 @@ const abi = [
   {
     inputs: [
       { internalType: "uint256", name: "_hatId", type: "uint256" },
-      { internalType: "address[]", name: "_contributors", type: "address[]" },
+      {
+        internalType: "address[]",
+        name: "_contributors",
+        type: "address[]",
+      },
       { internalType: "string", name: "_description", type: "string" },
       { internalType: "string", name: "_imageURL", type: "string" },
+      { internalType: "string", name: "_reportMetadata", type: "string" },
+      { internalType: "string[]", name: "_links", type: "string[]" },
       { internalType: "address", name: "_proposor", type: "address" },
       { internalType: "bytes[]", name: "_roleData", type: "bytes[]" },
     ],
@@ -480,7 +537,11 @@ const abi = [
   {
     inputs: [
       { internalType: "bytes32", name: "role", type: "bytes32" },
-      { internalType: "address", name: "callerConfirmation", type: "address" },
+      {
+        internalType: "address",
+        name: "callerConfirmation",
+        type: "address",
+      },
     ],
     name: "renounceRole",
     outputs: [],
@@ -491,7 +552,11 @@ const abi = [
     inputs: [],
     name: "resolver",
     outputs: [
-      { internalType: "contract AttesterResolver", name: "", type: "address" },
+      {
+        internalType: "contract AttesterResolver",
+        name: "",
+        type: "address",
+      },
     ],
     stateMutability: "view",
     type: "function",
@@ -543,7 +608,11 @@ const abi = [
   },
   {
     inputs: [
-      { internalType: "address payable", name: "_treasury", type: "address" },
+      {
+        internalType: "address payable",
+        name: "_treasury",
+        type: "address",
+      },
     ],
     name: "updateTreasury",
     outputs: [],
@@ -554,7 +623,11 @@ const abi = [
     inputs: [],
     name: "voteToken",
     outputs: [
-      { internalType: "contract VotingIESToken", name: "", type: "address" },
+      {
+        internalType: "contract VotingIESToken",
+        name: "",
+        type: "address",
+      },
     ],
     stateMutability: "view",
     type: "function",
