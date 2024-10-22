@@ -17,6 +17,7 @@ const query = gql`
       hatId
       name
       metadata
+      imageURL
       owner
       blockNumber
       blockTimestamp

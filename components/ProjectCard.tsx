@@ -10,23 +10,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fetchIPFSDATA, sliceAddress } from "@/utils";
 import { HatsMetadata, ProjectCardProps } from "@/utils/types";
 
-
-
 export default function ProjectCard({
-  id,
-  IES_id,
-  hatId,
-  name,
   metadata,
+  imageURL,
   owner,
-  blockNumber,
-  blockTimestamp,
-  transactionHash,
 }: ProjectCardProps) {
   let addr = sliceAddress(owner);
   const [projectData, setProjectData] = React.useState<HatsMetadata | null>(
     null
   );
+  const cid = imageURL.replace(/^ipfs:\/\//, "");
 
   useEffect(() => {
     async function fetchProjectData() {
@@ -40,11 +33,8 @@ export default function ProjectCard({
     <div className="w-lg rounded-[15px] bg-white cursor-pointer shadow-lg">
       <AspectRatio ratio={18 / 9} className="bg-muted">
         <Image
-          src={
-            `https://ipfs.io/ipfs/${metadata}` ||
-            "https://picsum.photos/500/300"
-          }
-          alt="Photo by Drew Beamer"
+          src={`https://ipfs.io/ipfs/${cid}` || "https://picsum.photos/500/300"}
+          alt="project image"
           fill
           className="rounded-md object-cover"
         />

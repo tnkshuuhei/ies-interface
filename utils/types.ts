@@ -22,10 +22,12 @@ export interface ProjectCardProps {
   hatId: any;
   name: string;
   metadata: string;
+  imageURL: string;
   owner: string;
   blockNumber: string;
   blockTimestamp: string;
   transactionHash: string;
+  ownerENS?: any;
 }
 
 export interface Profile {
@@ -38,11 +40,13 @@ export interface ProfileData {
   hatId: any;
   name: string;
   metadata: string;
+  imageURL: string;
   hatsData: HatsMetadata;
   owner: string;
   blockNumber: string;
   blockTimestamp: string;
   transactionHash: string;
+  ownerENS?: any;
 }
 
 export interface Profiles {

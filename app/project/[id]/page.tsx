@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-import { fetchIPFSDATA } from "@/utils";
+import { ENSResolver } from "@/lib/ens";
+import { fetchIPFSDATA, sliceAddress } from "@/utils";
 import { Profile, ProfileData } from "@/utils/types";
 
 const reports = [
@@ -57,6 +58,7 @@ const query = gql`
       hatId
       name
       metadata
+      imageURL
       owner
       blockNumber
       blockTimestamp
@@ -73,21 +75,30 @@ export default function ProjectDetailPage({
     id: string;
   };
 }) {
+  const resolver = new ENSResolver();
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["profile"],
+    queryKey: ["profile", params.id],
     queryFn: async (): Promise<ProfileData> => {
       try {
         const res: Profile = await request(ENDPOINT, query, { id: params.id });
 
         const metadata = res.profileCreated.metadata;
         const data = await fetchIPFSDATA(metadata);
-        // add data to res.profileCreated
 
         let newData: ProfileData;
+        const imageCID = res.profileCreated.imageURL.replace(/^ipfs:\/\//, "");
+        const ownerENS = await resolver.resolveAddress(
+          res.profileCreated.owner
+        );
+
         newData = {
           ...res.profileCreated,
+          imageURL: imageCID,
           hatsData: data,
+          ownerENS: ownerENS,
         };
+        console.log("newData", newData);
         return newData;
       } catch (error) {
         console.error(error);
@@ -104,7 +115,7 @@ export default function ProjectDetailPage({
           <div className="flex justify-between items-center">
             <CardTitle>{data?.hatsData.data.name}</CardTitle>
             <a
-              href="https://app.hatsprotocol.xyz/trees/11155111/614"
+              href="https://app.hatsprotocol.xyz/trees/11155111/617"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -127,14 +138,23 @@ export default function ProjectDetailPage({
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-medium">John Doe</p>
-                <p className="text-sm text-muted-foreground">Project Manager</p>
+                <p className="text-sm font-medium">
+                  {data?.ownerENS || sliceAddress(data?.owner!)}
+                </p>
+                {data?.ownerENS && (
+                  <p className="text-sm text-muted-foreground">
+                    {sliceAddress(data?.owner!)}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="aspect-video relative">
               <Image
-                src="https://picsum.photos/640/360"
+                src={
+                  `https://ipfs.io/ipfs/${data?.imageURL}` ||
+                  "https://picsum.photos/640/360"
+                }
                 alt="Project Overview"
                 className="rounded-lg object-cover w-full h-full"
                 width={640}
