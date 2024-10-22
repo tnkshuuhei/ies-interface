@@ -33,16 +33,7 @@ import { readAsBase64 } from "@/utils";
 import { pinToPinata } from "@/utils/pinata";
 import { HatsMetadata, Project, projectSchema } from "@/utils/types";
 
-// TODO: add form
-// TODO: encode data
-// TODO: approve voting tokens before creating a report
-export default function CreateReportPage({
-  params,
-}: {
-  params: {
-    id: string;
-  };
-}) {
+export default function CreateReportPage() {
   const [imageName, setImageName] = useState<string | null>(null);
   const [image, setImage] = useState<string | undefined>(undefined);
   const [file, setFile] = useState<File | undefined>(undefined);
