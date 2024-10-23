@@ -1,24 +1,18 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ethers } from "ethers";
-import { Upload } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { ethers, isAddress } from "ethers";
+import { Upload, Plus, Trash2 } from "lucide-react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,185 +20,285 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ToastAction } from "@/components/ui/toast";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 
+import { ies } from "@/constants/ies";
 import { useIES } from "@/hooks/useIES";
+import { useVotingToken } from "@/hooks/useVotingToken";
 import { readAsBase64 } from "@/utils";
 import { pinToPinata } from "@/utils/pinata";
-import { HatsMetadata, Project, projectSchema } from "@/utils/types";
+import { HatsMetadata } from "@/utils/types";
 
-interface Role {
-  parentHatId: bigint;
-  metadata: string;
+// Add interface for role images
+interface RoleImage {
+  file: File;
+  preview: string;
   name: string;
-  description: string;
-  wearer: `0x${string}`[];
-  imageUrl: string;
 }
 
-export default function Register({
-  params,
-}: {
-  params: {
-    id: string;
-  };
-}) {
+const Address = z.custom<string>(isAddress, "Invalid Address");
+
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  contributors: z.array(
+    z.object({
+      address: Address as z.ZodType<`0x${string}`, z.ZodTypeDef, `0x${string}`>,
+    })
+  ),
+  links: z.array(z.object({ url: z.string().url() })),
+  roles: z.array(
+    z.object({
+      parentHatId: z.string(),
+      name: z.string(),
+      description: z.string(),
+      wearers: z.array(
+        z.string().refine(isAddress, { message: "Invalid Address" })
+      ),
+      imageUrl: z.string(),
+    })
+  ),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+export default function Register({ params }: { params: { id: string } }) {
   const [imageName, setImageName] = useState<string | null>(null);
   const [image, setImage] = useState<string | undefined>(undefined);
   const [file, setFile] = useState<File | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+  // Add state for role images
+  const [roleImages, setRoleImages] = useState<Record<number, RoleImage>>({});
 
   const account = useAccount();
   const AbiCoder = new ethers.AbiCoder();
+  const { createImpactReport } = useIES();
+  const { approve } = useVotingToken();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      contributors: [{ address: account.address as `0x${string}` }],
+      links: [{ url: "" }],
+      roles: [
+        {
+          parentHatId: params.id,
+          name: "",
+          description: "",
+          wearers: [account.address as `0x${string}`],
+          imageUrl: "",
+        },
+      ],
+    },
+  });
+
   const {
-    createImpactReport,
-    reportHash,
-    isCreating,
-    isCreated,
-    IsErrorCreated,
-  } = useIES();
+    fields: contributorFields,
+    append: appendContributor,
+    remove: removeContributor,
+  } = useFieldArray({
+    control: form.control,
+    name: "contributors",
+  });
+
+  const {
+    fields: linkFields,
+    append: appendLink,
+    remove: removeLink,
+  } = useFieldArray({
+    control: form.control,
+    name: "links",
+  });
+
+  const {
+    fields: roleFields,
+    append: appendRole,
+    remove: removeRole,
+  } = useFieldArray({
+    control: form.control,
+    name: "roles",
+  });
 
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const file: File | null = e.target.files[0];
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
       const base64 = await readAsBase64(file);
-      setImageName(file ? file.name : null);
+      setImageName(file.name);
       setFile(file);
       setImage(base64);
     }
   };
 
-  const form = useForm<Project>({
-    resolver: zodResolver(projectSchema),
-    mode: "onChange",
-  });
+  // Add handler for role images
+  const handleRoleImage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      const base64 = await readAsBase64(file);
+      setRoleImages((prev) => ({
+        ...prev,
+        [index]: {
+          file,
+          preview: base64,
+          name: file.name,
+        },
+      }));
+    }
+  };
 
-  async function onSubmit(data: Project) {
-    if (!file) return alert("Please upload an image");
-    const { name, description } = data;
-
-    const metadata: HatsMetadata = {
-      type: "1.0",
-      data: {
-        name,
-        description,
-        responsibilities: [],
-        authorities: [],
-      },
-    };
-
-    const tiem = new Date().getTime();
-    const metadataFile = new File([JSON.stringify(metadata)], `${tiem}.json`);
-
-    const projectCID = await pinToPinata({
-      file: metadataFile,
-      isLoading: isLoading,
-      setIsLoading: setIsLoading,
+  async function encodedRoles(
+    roles: FormData["roles"]
+  ): Promise<`0x${string}`[]> {
+    const encodedRoles = roles.map(async (role) => {
+      const name = role.name;
+      const description = role.description;
+      const metadata: HatsMetadata = {
+        type: "1.0",
+        data: {
+          name,
+          description,
+          responsibilities: [],
+          authorities: [],
+        },
+      };
+      const metadataFile = new File(
+        [JSON.stringify(metadata)],
+        `${Date.now()}.json`
+      );
+      const metadataCID = await pinToPinata({
+        file: metadataFile,
+        isLoading,
+        setIsLoading,
+      });
+      return AbiCoder.encode(
+        ["tuple(uint256,string,string,string,address[],string)"],
+        [
+          [
+            BigInt(role.parentHatId),
+            `ipfs://${metadataCID}`,
+            role.name,
+            role.description,
+            role.wearers as `0x${string}`[],
+            role.imageUrl,
+          ],
+        ]
+      ) as `0x${string}`;
     });
-
-    console.log("✅ Project CID", projectCID);
-
-    const imageCID = await pinToPinata({ file, isLoading, setIsLoading });
-    console.log("✅ Image CID", imageCID);
-
-    const roles: Role[] = [
-      {
-        parentHatId: BigInt(params.id),
-        metadata: "ipfs://QmQh48H7yrw6i5PQANXbSTyC4D7WLLUUn5V4Pv1Hwo2M68",
-        name: "Researcher Role",
-        description: "Researcher role",
-        wearer: [account.address!],
-        imageUrl: "ipfs://QmTRGCnTfwHhyr64aSNZqpP68ABFNQu9W9TJZEo4vL3FRu",
-      },
-      {
-        parentHatId: BigInt(params.id),
-        metadata: "ipfs://Qma89Row648R7vpPzis2qpz3a9SZAmTR5pEGCYPM2FXH9J",
-        name: "Developer",
-        description: "The developer role",
-        wearer: [account.address!],
-        imageUrl: "ipfs://QmRZ9ULzLKC1uzAvLyxAAhYoXyQMS413zPviGLu6vG4Bzw",
-      },
-    ];
-
-    const role1 = AbiCoder.encode(
-      ["tuple(uint256, string, string, string, address[], string)"],
-      [
-        [
-          BigInt(params.id),
-          "ipfs://QmQh48H7yrw6i5PQANXbSTyC4D7WLLUUn5V4Pv1Hwo2M68",
-          "Researcher Role",
-          "Researcher role",
-          [account.address!, "0x06aa005386F53Ba7b980c61e0D067CaBc7602a62"],
-          "ipfs://QmTRGCnTfwHhyr64aSNZqpP68ABFNQu9W9TJZEo4vL3FRu",
-        ],
-      ]
-    );
-
-    console.log("✅ Role 1", role1);
-
-    const role2 = AbiCoder.encode(
-      ["tuple(uint256, string, string, string, address[], string)"],
-      [
-        [
-          BigInt(params.id),
-          "ipfs://Qma89Row648R7vpPzis2qpz3a9SZAmTR5pEGCYPM2FXH9J",
-          "Developer",
-          "The developer role",
-          [account.address!],
-          "ipfs://QmRZ9ULzLKC1uzAvLyxAAhYoXyQMS413zPviGLu6vG4Bzw",
-        ],
-      ]
-    );
-    console.log("✅ Role 2", role2);
-
-    createImpactReport(
-      BigInt(params.id),
-      [account.address!, "0x06aa005386F53Ba7b980c61e0D067CaBc7602a62"],
-      "first report",
-      "ipfs://QmaUeuCCPvyViz8fBQM3BRuqsSPYPWYUAiD6Ai76q2P9ok",
-      "QmaUeuCCPvyViz8fBQM3BRuqsSPYPWYUAiD6Ai76q2P9ok", // report metadata
-      ["https://www.google.com"], 
-      account.address!,
-      [role1 as `0x${string}`]
-    );
+    return Promise.all(encodedRoles);
   }
 
-  useEffect(() => {
-    if (isCreated) {
-      toast({
-        title: "Impact report created!",
-        description: "impact report has been successfully created",
-        action: (
-          <ToastAction
-            altText="Copy to clipboard"
-            onClick={() => {
-              navigator.clipboard.writeText(
-                `${account.chain?.blockExplorers?.default.url}/tx/${reportHash}`
-              );
-            }}
-          >
-            Copy
-          </ToastAction>
-        ),
+  // Add function to remove role image
+  const removeRoleImage = (index: number) => {
+    setRoleImages((prev) => {
+      const newImages = { ...prev };
+      delete newImages[index];
+      return newImages;
+    });
+  };
+
+  async function onSubmit(data: FormData) {
+    try {
+      if (!file) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Please upload an image",
+        });
+        return;
+      }
+
+      setIsLoading(true);
+
+      const imageCID = await pinToPinata({ file, isLoading, setIsLoading });
+      const imageUrl = `ipfs://${imageCID}`;
+
+      // Upload role images and get their CIDs
+      const rolesCopy = [...data.roles];
+      for (let i = 0; i < rolesCopy.length; i++) {
+        const roleImage = roleImages[i];
+        if (roleImage) {
+          const roleCID = await pinToPinata({
+            file: roleImage.file,
+            isLoading,
+            setIsLoading,
+          });
+          rolesCopy[i] = {
+            ...rolesCopy[i],
+            imageUrl: `ipfs://${roleCID}`,
+          };
+        }
+      }
+
+      const metadata = {
+        name: data.name,
+        description: data.description,
+        image: imageUrl,
+        contributors: data.contributors,
+        links: data.links,
+        roles: rolesCopy,
+      };
+
+      const metadataFile = new File(
+        [JSON.stringify(metadata)],
+        `${Date.now()}.json`
+      );
+
+      const metadataCID = await pinToPinata({
+        file: metadataFile,
+        isLoading,
+        setIsLoading,
       });
-    } else if (IsErrorCreated) {
+
+      const encoded = await encodedRoles(rolesCopy);
+
+      await approve(ies.address, "100");
+
+      const mappingContributors = data.contributors.map(
+        (contributor) => contributor.address
+      );
+
+      const mappingLinks = data.links.map((link) => link.url);
+
+      await createImpactReport(
+        BigInt(params.id),
+        mappingContributors,
+        data.description,
+        imageUrl,
+        metadataCID,
+        mappingLinks,
+        account.address as `0x${string}`,
+        encoded
+      );
+
+      toast({
+        title: "Success",
+        description: "Impact report created successfully",
+      });
+    } catch (error) {
+      console.error(error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "An error occurred while creating the impact report",
+        description: "Failed to create impact report",
       });
-    } else return;
-  }, [isCreated, IsErrorCreated]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Create impact report</CardTitle>
+        <CardTitle>Create Impact Report</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -212,15 +306,13 @@ export default function Register({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <div>
-                      <Input {...field} />
-                    </div>
+                    <Input {...field} />
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="description"
@@ -228,24 +320,99 @@ export default function Register({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <div>
-                      <Input {...field} />
-                    </div>
+                    <Textarea {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Enter project description up to 100 characters
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            <div className="space-y-4">
+              <Label>Contributors</Label>
+              {contributorFields.map((field, index) => (
+                <div key={field.id} className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`contributors.${index}.address`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input {...field} placeholder="0x..." />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {index > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => removeContributor(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  appendContributor({
+                    address: "" as `0x${string}`,
+                  })
+                }
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Contributor
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <Label>Evidence Links</Label>
+              {linkFields.map((field, index) => (
+                <div key={field.id} className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`links.${index}.url`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="url"
+                            placeholder="https://..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => removeLink(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => appendLink({ url: "" })}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Link
+              </Button>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="image">Image</Label>
-              <div className="flex items-center space-x-2">
+              <Label htmlFor="image">Cover Image</Label>
+              <div className="flex items-center gap-2">
                 <Input
                   id="image"
-                  name="image"
                   type="file"
                   onChange={handleImage}
                   className="hidden"
@@ -254,22 +421,210 @@ export default function Register({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => document.getElementById("image")!.click()}
+                  onClick={() => document.getElementById("image")?.click()}
                 >
-                  <Upload className="mr-2 h-4 w-4" /> Upload Image
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Cover Image
                 </Button>
                 <span className="text-sm text-gray-500">
-                  {file ? imageName : "No file chosen"}
+                  {imageName || "No file chosen"}
                 </span>
               </div>
+              {image && (
+                <div className="mt-2">
+                  <img
+                    src={image}
+                    alt="Cover preview"
+                    className="max-w-[200px] rounded-md"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <Label>Roles</Label>
+              {roleFields.map((field, roleIndex) => (
+                <div key={field.id} className="space-y-4 p-4 border rounded-lg">
+                  <FormField
+                    control={form.control}
+                    name={`roles.${roleIndex}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`roles.${roleIndex}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role Description</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Wearers Section */}
+                  <div className="space-y-2">
+                    <Label>Role Wearers</Label>
+                    <div className="space-y-2">
+                      {form
+                        .getValues(`roles.${roleIndex}.wearers`)
+                        .map((_, wearerIndex) => (
+                          <div key={wearerIndex} className="flex gap-2">
+                            <FormField
+                              control={form.control}
+                              name={`roles.${roleIndex}.wearers.${wearerIndex}`}
+                              render={({ field }) => (
+                                <FormItem className="flex-1">
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder="Wearer address (0x...)"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            {wearerIndex > 0 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => {
+                                  const currentWearers = form.getValues(
+                                    `roles.${roleIndex}.wearers`
+                                  );
+                                  const newWearers = [
+                                    ...currentWearers.slice(0, wearerIndex),
+                                    ...currentWearers.slice(wearerIndex + 1),
+                                  ];
+                                  form.setValue(
+                                    `roles.${roleIndex}.wearers`,
+                                    newWearers
+                                  );
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const currentWearers = form.getValues(
+                            `roles.${roleIndex}.wearers`
+                          );
+                          form.setValue(`roles.${roleIndex}.wearers`, [
+                            ...currentWearers,
+                            "" as `0x${string}`,
+                          ]);
+                        }}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Wearer
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Role Image Section */}
+                  <div className="space-y-2">
+                    <Label>Role Image</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id={`role-image-${roleIndex}`}
+                        type="file"
+                        onChange={(e) => handleRoleImage(e, roleIndex)}
+                        className="hidden"
+                        accept="image/*"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          document
+                            .getElementById(`role-image-${roleIndex}`)
+                            ?.click()
+                        }
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Role Image
+                      </Button>
+                      <span className="text-sm text-gray-500">
+                        {roleImages[roleIndex]?.name || "No file chosen"}
+                      </span>
+                      {roleImages[roleIndex] && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeRoleImage(roleIndex)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    {roleImages[roleIndex] && (
+                      <div className="mt-2">
+                        <img
+                          src={roleImages[roleIndex].preview}
+                          alt={`Role ${roleIndex + 1} preview`}
+                          className="max-w-[200px] rounded-md"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {roleIndex > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        removeRole(roleIndex);
+                        removeRoleImage(roleIndex);
+                      }}
+                    >
+                      Remove Role
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  appendRole({
+                    parentHatId: params.id,
+                    name: "",
+                    description: "",
+                    wearers: [account.address as `0x${string}`],
+                    imageUrl: "",
+                  })
+                }
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Role
+              </Button>
             </div>
 
             <Button
               type="submit"
               className="w-full"
-              disabled={isCreating || !account.isConnected || !image}
+              disabled={isLoading || !account.isConnected || !image}
             >
-              Submit
+              {isLoading ? "Creating..." : "Create Impact Report"}
             </Button>
           </form>
         </Form>
