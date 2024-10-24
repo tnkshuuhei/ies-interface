@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { ENSResolver } from "@/lib/ens";
 import { fetchIPFSDATA, formatBlockTimestamp, sliceAddress } from "@/utils";
@@ -124,6 +125,72 @@ export default function ProjectDetailPage({
     },
     enabled: !!data?.hatId,
   });
+  if (reportLoading || isLoading) {
+    return (
+      <div className="container mx-auto p-4">
+        <Card className="w-full max-w-3xl mx-auto">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-9 w-36" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Avatar and Name Skeleton */}
+              <div className="flex items-center space-x-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </div>
+
+              {/* Image Skeleton */}
+              <div className="aspect-video relative">
+                <Skeleton className="w-full h-full rounded-lg" />
+              </div>
+
+              {/* Description Skeleton */}
+              <div>
+                <Skeleton className="h-6 w-40 mb-4" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-4/5" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Reports Section Skeleton */}
+              <div>
+                <Skeleton className="h-6 w-40 mb-4" />
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Skeleton className="h-5 w-5" />
+                        <div>
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-24 mt-1" />
+                        </div>
+                      </div>
+                      <Skeleton className="h-9 w-28" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Skeleton className="h-9 w-28" />
+            <Skeleton className="h-9 w-32" />
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4">
