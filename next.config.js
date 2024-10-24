@@ -8,6 +8,19 @@ const nextConfig = {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
+  headers: () => {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

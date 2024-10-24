@@ -41,6 +41,7 @@ export default function Home() {
         throw new Error("Error fetching profiles");
       }
     },
+    refetchInterval: 10000,
   });
 
   return (
