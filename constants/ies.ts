@@ -1,4 +1,4 @@
-const address: `0x${string}` = "0xF77E452eC289dA0616574aae371800CA4D6315B1";
+const address: `0x${string}` = "0x9214423D410364613631723aB68ed924c42f874b";
 const abi = [
   {
     inputs: [
@@ -75,6 +75,18 @@ const abi = [
         internalType: "uint256",
         name: "proposalId",
         type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "proposer",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "reportMetadata",
+        type: "string",
       },
     ],
     name: "ImpactReportCreated",
