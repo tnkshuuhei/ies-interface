@@ -330,6 +330,7 @@ export default function Register({ params }: { params: { id: string } }) {
       await createImpactReport(
         BigInt(params.id),
         mappingContributors,
+        data.name,
         data.description,
         imageUrl,
         metadataCID,

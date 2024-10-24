@@ -1,4 +1,4 @@
-const address: `0x${string}` = "0xFD48e7f4c8EE34109607bb1EB1A6779A21884A03";
+const address: `0x${string}` = "0xCcf101e83344FD834B995d6647f1DcB96dC34Ed2";
 const abi = [
   {
     inputs: [
@@ -645,5 +645,5 @@ const abi = [
 export const tokenConfig = {
   address: address,
   abi: abi,
-	decimals: 18,
+  decimals: 18,
 };

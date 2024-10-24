@@ -1,4 +1,4 @@
-const address: `0x${string}` = "0x66d95DB9258621211Fc220510356B74f5900A13d";
+const address: `0x${string}` = "0xF77E452eC289dA0616574aae371800CA4D6315B1";
 const abi = [
   {
     inputs: [
@@ -378,6 +378,7 @@ const abi = [
         name: "_contributors",
         type: "address[]",
       },
+      { internalType: "string", name: "_title", type: "string" },
       { internalType: "string", name: "_description", type: "string" },
       { internalType: "string", name: "_imageURL", type: "string" },
       { internalType: "string", name: "_reportMetadata", type: "string" },
