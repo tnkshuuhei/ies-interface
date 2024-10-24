@@ -8,7 +8,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,36 +20,26 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import { ENSResolver } from "@/lib/ens";
-import { fetchIPFSDATA, sliceAddress } from "@/utils";
-import { Profile, ProfileData } from "@/utils/types";
+import { fetchIPFSDATA, formatBlockTimestamp, sliceAddress } from "@/utils";
+import { Profile, ProfileData, ReportData, Reports } from "@/utils/types";
 
-const reports = [
-  {
-    id: 1,
-    title: "Q2 2024 Sales Report",
-    date: "2024-06-30",
-    type: "Quarterly",
-  },
-  {
-    id: 2,
-    title: "EcoTech Solutions Launch Analysis",
-    date: "2024-05-15",
-    type: "Product",
-  },
-  {
-    id: 3,
-    title: "Digital Marketing Campaign Results",
-    date: "2024-06-01",
-    type: "Marketing",
-  },
-  {
-    id: 4,
-    title: "Customer Retention Strategy",
-    date: "2024-06-20",
-    type: "Strategy",
-  },
-];
-const query = gql`
+const reportQuery = gql`
+  query GetImpactReportCreateds($hatId: BigInt!) {
+    impactReportCreateds(first: 5, where: { projectHatId: $hatId }) {
+      id
+      projectHatId
+      reportHatId
+      proposalId
+      proposer
+      reportMetadata
+      blockNumber
+      blockTimestamp
+      transactionHash
+    }
+  }
+`;
+
+const profileQuery = gql`
   query GetProfileCreated($id: ID!) {
     profileCreated(id: $id) {
       id
@@ -81,7 +70,9 @@ export default function ProjectDetailPage({
     queryKey: ["profile", params.id],
     queryFn: async (): Promise<ProfileData> => {
       try {
-        const res: Profile = await request(ENDPOINT, query, { id: params.id });
+        const res: Profile = await request(ENDPOINT, profileQuery, {
+          id: params.id,
+        });
 
         const metadata = res.profileCreated.metadata;
         const data = await fetchIPFSDATA(metadata);
@@ -98,7 +89,6 @@ export default function ProjectDetailPage({
           hatsData: data,
           ownerENS: ownerENS,
         };
-        console.log("newData", newData);
         return newData;
       } catch (error) {
         console.error(error);
@@ -108,6 +98,33 @@ export default function ProjectDetailPage({
     enabled: !!params.id,
   });
 
+  const {
+    data: reportData,
+    isLoading: reportLoading,
+    error: reportError,
+  } = useQuery({
+    queryKey: ["reports", data?.hatId],
+    queryFn: async (): Promise<ReportData[]> => {
+      try {
+        const res: Reports = await request(ENDPOINT, reportQuery, {
+          hatId: data?.hatId,
+        });
+
+        for (let i = 0; i < res.impactReportCreateds.length; i++) {
+          const metadata = res.impactReportCreateds[i].reportMetadata;
+          const data = await fetchIPFSDATA(metadata);
+          res.impactReportCreateds[i].rawReportData = data;
+        }
+
+        return res.impactReportCreateds;
+      } catch (error) {
+        console.error(error);
+        throw new Error("Error fetching reports");
+      }
+    },
+    enabled: !!data?.hatId,
+  });
+
   return (
     <div className="container mx-auto p-4">
       <Card className="w-full max-w-3xl mx-auto">
@@ -115,7 +132,7 @@ export default function ProjectDetailPage({
           <div className="flex justify-between items-center">
             <CardTitle>{data?.hatsData.data.name}</CardTitle>
             <a
-              href="https://app.hatsprotocol.xyz/trees/11155111/617"
+              href={`${process.env.NEXT_PUBLIC_HATS_URL!}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -174,7 +191,7 @@ export default function ProjectDetailPage({
             <div>
               <h3 className="text-lg font-semibold mb-4">Project Reports</h3>
               <ul className="space-y-4">
-                {reports.map((report) => (
+                {reportData?.map((report) => (
                   <li
                     key={report.id}
                     className="flex items-center justify-between"
@@ -182,13 +199,28 @@ export default function ProjectDetailPage({
                     <div className="flex items-center space-x-3">
                       <FileText className="h-5 w-5 text-muted-foreground" />
                       <div>
-                        <p className="text-sm font-medium">{report.title}</p>
+                        <p className="text-sm font-medium">
+                          {report.rawReportData.name}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {report.date}
+                          {formatBlockTimestamp(report.blockTimestamp)}
                         </p>
                       </div>
                     </div>
-                    <Badge variant="secondary">{report.type}</Badge>
+                    <a
+                      href={`https://www.tally.xyz/gov/${process.env.NEXT_PUBLIC_TALLY}/proposal/${report.proposalId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        View on Tally
+                      </Button>
+                    </a>
                   </li>
                 ))}
               </ul>

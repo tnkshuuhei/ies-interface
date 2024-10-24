@@ -49,6 +49,33 @@ export interface ProfileData {
   ownerENS?: any;
 }
 
+export interface Reports {
+  impactReportCreateds: ReportData[];
+}
+
+export interface ReportData {
+  id: string;
+  projectHatId: string;
+  reportHatId: string;
+  proposalId: string;
+  proposer: string;
+  reportMetadata: string;
+  blockNumber: string;
+  blockTimestamp: string;
+  transactionHash: string;
+  rawReportData: {
+    name: string;
+    description: string;
+    contributores: {
+      address: string;
+    }[];
+    links?: {
+      url: string;
+    }[];
+    roles?: any;
+  };
+}
+
 export interface Profiles {
   profileCreateds: ProjectCardProps[];
 }
