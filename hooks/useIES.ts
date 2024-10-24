@@ -8,7 +8,7 @@ import { Project } from "@/utils/types";
 export function useIES() {
   const { toast } = useToast();
   const { data: registerHash, writeContract: register } = useWriteContract();
-  const { data: reportHash, writeContract: createReport } = useWriteContract();
+  const { data: reportHash, writeContractAsync: createReport } = useWriteContract();
 
   function registerIES(
     data: Project,
@@ -41,7 +41,7 @@ export function useIES() {
     );
   }
 
-  function createImpactReport(
+  async function createImpactReport(
     projectHatId: bigint,
     contributors: `0x${string}`[],
     description: string,

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ethers, isAddress } from "ethers";
@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 
 import { ies } from "@/constants/ies";
@@ -68,13 +69,75 @@ export default function Register({ params }: { params: { id: string } }) {
   const [image, setImage] = useState<string | undefined>(undefined);
   const [file, setFile] = useState<File | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+
   // Add state for role images
   const [roleImages, setRoleImages] = useState<Record<number, RoleImage>>({});
 
   const account = useAccount();
   const AbiCoder = new ethers.AbiCoder();
-  const { createImpactReport } = useIES();
-  const { approve } = useVotingToken();
+  const {
+    createImpactReport,
+    reportHash,
+    isCreating,
+    isCreated,
+    IsErrorCreated,
+  } = useIES();
+  const { approve, isApproving, isApproved, IsErrorApproved, approveHash } =
+    useVotingToken();
+
+  useEffect(() => {
+    if (isCreated) {
+      toast({
+        title: "Report submitted",
+        description: "Your report has been submitted successfully",
+        action: (
+          <ToastAction
+            altText="Copy to clipboard"
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `${account.chain?.blockExplorers?.default.url}/tx/${reportHash}`
+              );
+            }}
+          >
+            Copy
+          </ToastAction>
+        ),
+      });
+    } else if (IsErrorCreated) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An error occurred while submitting the report",
+      });
+    } else return;
+  }, [isCreated, IsErrorCreated, reportHash]);
+
+  useEffect(() => {
+    if (isApproved) {
+      toast({
+        title: "Approved",
+        description: "You have successfully approved the contract",
+        action: (
+          <ToastAction
+            altText="Copy to clipboard"
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `${account.chain?.blockExplorers?.default.url}/tx/${approveHash}`
+              );
+            }}
+          >
+            Copy
+          </ToastAction>
+        ),
+      });
+    } else if (IsErrorApproved) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An error occurred while approving the contract",
+      });
+    }
+  }, [isApproved, IsErrorApproved, approveHash]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -274,11 +337,6 @@ export default function Register({ params }: { params: { id: string } }) {
         account.address as `0x${string}`,
         encoded
       );
-
-      toast({
-        title: "Success",
-        description: "Impact report created successfully",
-      });
     } catch (error) {
       console.error(error);
       toast({
@@ -622,7 +680,13 @@ export default function Register({ params }: { params: { id: string } }) {
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading || !account.isConnected || !image}
+              disabled={
+                isLoading ||
+                !account.isConnected ||
+                !image ||
+                isApproving ||
+                isCreating
+              }
             >
               {isLoading ? "Creating..." : "Create Impact Report"}
             </Button>
