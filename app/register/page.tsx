@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
 
@@ -38,6 +39,8 @@ export default function CreateReportPage() {
   const [image, setImage] = useState<string | undefined>(undefined);
   const [file, setFile] = useState<File | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const account = useAccount();
 
@@ -118,6 +121,7 @@ export default function CreateReportPage() {
           </ToastAction>
         ),
       });
+      router.push(`/`);
     } else if (IsErrorRegistered) {
       toast({
         variant: "destructive",

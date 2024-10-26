@@ -66,9 +66,16 @@ export default function ProjectCard({
         <p className="mt-[5px] font-epilogue font-normal text-[#808191] text-left leading-[18px] truncate">
           {projectData?.data?.description}
         </p>
-        <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] leading-[22px]">
-          {reportData.length || "0"} reports submitted
-        </h4>
+
+        {reportData?.length === 0 ? (
+          <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] leading-[22px]">
+            no reports submitted
+          </h4>
+        ) : (
+          <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] leading-[22px]">
+            {reportData?.length} reports submitted
+          </h4>
+        )}
       </div>
     </div>
   );

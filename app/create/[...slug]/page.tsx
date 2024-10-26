@@ -101,7 +101,11 @@ const defaultValues: FormData = {
   ],
 };
 
-export default function Register({ params }: { params: { id: string } }) {
+export default function Register({ params }: { params: { slug: string[] } }) {
+  console.log("params", params);
+  const id = params.slug[0];
+  const hatsId = params.slug[1];
+
   const [imageName, setImageName] = useState<string | null>(null);
   const [image, setImage] = useState<string | undefined>(undefined);
   const [file, setFile] = useState<File | undefined>(undefined);
@@ -150,7 +154,7 @@ export default function Register({ params }: { params: { id: string } }) {
           </ToastAction>
         ),
       });
-      
+      router.push(`/project/${id}`);
     } else if (IsErrorCreated) {
       toast({
         variant: "destructive",
@@ -196,7 +200,7 @@ export default function Register({ params }: { params: { id: string } }) {
     //   links: [{ url: "" }],
     //   roles: [
     //     {
-    //       parentHatId: params.id,
+    //       parentHatId: hatsId,
     //       name: "",
     //       description: "",
     //       wearers: [account.address as `0x${string}`],
@@ -375,7 +379,7 @@ export default function Register({ params }: { params: { id: string } }) {
       const mappingLinks = data.links.map((link) => link.url);
 
       await createImpactReport(
-        BigInt(params.id),
+        BigInt(hatsId),
         mappingContributors,
         data.name,
         data.description,
@@ -712,7 +716,7 @@ export default function Register({ params }: { params: { id: string } }) {
                 variant="outline"
                 onClick={() =>
                   appendRole({
-                    parentHatId: params.id,
+                    parentHatId: hatsId,
                     name: "",
                     description: "",
                     wearers: [account.address as `0x${string}`],

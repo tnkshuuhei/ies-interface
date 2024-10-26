@@ -92,6 +92,7 @@ export default function ProjectDetailPage({
     },
     enabled: !!data?.hatId,
   });
+
   if (reportLoading || isLoading) {
     return (
       <div className="container mx-auto p-4">
@@ -164,7 +165,7 @@ export default function ProjectDetailPage({
       <Card className="w-full max-w-3xl mx-auto">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>{data?.hatsData.data.name}</CardTitle>
+            <CardTitle>{data?.hatsData?.data?.name}</CardTitle>
             <a
               href={`${process.env.NEXT_PUBLIC_HATS_URL!}`}
               target="_blank"
@@ -186,7 +187,7 @@ export default function ProjectDetailPage({
             <div className="flex items-center space-x-4">
               <Avatar>
                 <AvatarImage src="https://picsum.photos/500/300" alt="Author" />
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarFallback></AvatarFallback>
               </Avatar>
               <div>
                 <p className="text-sm font-medium">
@@ -225,6 +226,11 @@ export default function ProjectDetailPage({
             <div>
               <h3 className="text-lg font-semibold mb-4">Project Reports</h3>
               <ul className="space-y-4">
+                {reportData?.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No reports submitted yet
+                  </p>
+                )}
                 {reportData?.map((report) => (
                   <li
                     key={report.id}
@@ -264,7 +270,7 @@ export default function ProjectDetailPage({
         <CardFooter className="flex justify-between">
           <Button variant="outline">View All Reports</Button>
           <Link
-            href={`/create/${data?.hatId}`}
+            href={`/create/${data?.id}/${data?.hatId}`}
             target="_blank"
             rel="noopener noreferrer"
           >
