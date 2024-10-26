@@ -2,15 +2,18 @@
 
 import React, { useEffect } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+import request from "graphql-request";
 import Image from "next/image";
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { fetchIPFSDATA, sliceAddress } from "@/utils";
+import { ENDPOINT, reportQuery } from "@/utils/query";
 import { HatsMetadata, ProjectCardProps } from "@/utils/types";
 
 export default function ProjectCard({
+  hatId,
   metadata,
   imageURL,
   owner,
@@ -29,6 +32,20 @@ export default function ProjectCard({
     fetchProjectData();
   }, [metadata]);
 
+  const { data: reportData } = useQuery({
+    queryKey: ["reports", hatId],
+    queryFn: async () => {
+      try {
+        return await request(ENDPOINT, reportQuery, {
+          hatId: hatId,
+        }).then((data: any) => data.impactReportCreateds);
+      } catch (error) {
+        console.error(error);
+        throw new Error("Error fetching reports");
+      }
+    },
+    enabled: !!hatId,
+  });
   return (
     <div className="w-lg rounded-[15px] bg-white cursor-pointer shadow-lg">
       <AspectRatio ratio={18 / 9} className="bg-muted">
@@ -50,7 +67,7 @@ export default function ProjectCard({
           {projectData?.data?.description}
         </p>
         <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] leading-[22px]">
-          0 reports submitted
+          {reportData.length || "0"} reports submitted
         </h4>
       </div>
     </div>
