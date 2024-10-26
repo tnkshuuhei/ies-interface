@@ -1,4 +1,4 @@
-const address: `0x${string}` = "0x33A4d90b2871D99aEe06bB38F50da3Fd771Fca12";
+const address: `0x${string}` = "0xdb5c960B08bb168aC20a87B34916F54c6f5340C8";
 const abi = [
   {
     inputs: [
