@@ -93,7 +93,7 @@ export default function ProjectDetailPage({
     enabled: !!data?.hatId,
   });
 
-  if (reportLoading || isLoading) {
+  if (reportLoading || isLoading || !reportData || !data) {
     return (
       <div className="container mx-auto p-4">
         <Card className="w-full max-w-3xl mx-auto">
@@ -158,126 +158,132 @@ export default function ProjectDetailPage({
         </Card>
       </div>
     );
-  }
+  } else {
+    return (
+      <div className="container mx-auto p-4">
+        <Card className="w-full max-w-3xl mx-auto">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle>{data?.hatsData?.data?.name}</CardTitle>
+              <a
+                href={`${process.env.NEXT_PUBLIC_HATS_URL!}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View on Hats tree
+                </Button>
+              </a>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <Avatar>
+                  <AvatarImage
+                    src="https://picsum.photos/500/300"
+                    alt="Author"
+                  />
+                  <AvatarFallback></AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium">
+                    {data?.ownerENS || sliceAddress(data?.owner!)}
+                  </p>
+                  {data?.ownerENS && (
+                    <p className="text-sm text-muted-foreground">
+                      {sliceAddress(data?.owner!)}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-  return (
-    <div className="container mx-auto p-4">
-      <Card className="w-full max-w-3xl mx-auto">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>{data?.hatsData?.data?.name}</CardTitle>
-            <a
-              href={`${process.env.NEXT_PUBLIC_HATS_URL!}`}
+              <div className="aspect-video relative">
+                <Image
+                  src={
+                    `https://ipfs.io/ipfs/${data?.imageURL}` ||
+                    "https://picsum.photos/640/360"
+                  }
+                  alt="Project Overview"
+                  className="rounded-lg object-cover w-full h-full"
+                  width={640}
+                  height={360}
+                />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold">Project Description</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {data?.hatsData.data.description}
+                </p>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Project Reports</h3>
+                <ul className="space-y-4">
+                  {reportData?.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No reports submitted yet
+                    </p>
+                  ) : (
+                    <>
+                      {reportData?.map((report) => (
+                        <li
+                          key={report.id}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <FileText className="h-5 w-5 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm font-medium">
+                                {report?.rawReportData?.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatBlockTimestamp(report?.blockTimestamp)}
+                              </p>
+                            </div>
+                          </div>
+                          <a
+                            href={`https://www.tally.xyz/gov/${process.env.NEXT_PUBLIC_TALLY}/proposal/${report?.proposalId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center gap-2"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              View on Tally
+                            </Button>
+                          </a>
+                        </li>
+                      ))}
+                    </>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="outline">View All Reports</Button>
+            <Link
+              href={`/create/${data?.id}/${data?.hatId}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <ExternalLink className="h-4 w-4" />
-                View on Hats tree
-              </Button>
-            </a>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div className="flex items-center space-x-4">
-              <Avatar>
-                <AvatarImage src="https://picsum.photos/500/300" alt="Author" />
-                <AvatarFallback></AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium">
-                  {data?.ownerENS || sliceAddress(data?.owner!)}
-                </p>
-                {data?.ownerENS && (
-                  <p className="text-sm text-muted-foreground">
-                    {sliceAddress(data?.owner!)}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="aspect-video relative">
-              <Image
-                src={
-                  `https://ipfs.io/ipfs/${data?.imageURL}` ||
-                  "https://picsum.photos/640/360"
-                }
-                alt="Project Overview"
-                className="rounded-lg object-cover w-full h-full"
-                width={640}
-                height={360}
-              />
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold">Project Description</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {data?.hatsData.data.description}
-              </p>
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Project Reports</h3>
-              <ul className="space-y-4">
-                {reportData?.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    No reports submitted yet
-                  </p>
-                )}
-                {reportData?.map((report) => (
-                  <li
-                    key={report.id}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <FileText className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">
-                          {report.rawReportData.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatBlockTimestamp(report.blockTimestamp)}
-                        </p>
-                      </div>
-                    </div>
-                    <a
-                      href={`https://www.tally.xyz/gov/${process.env.NEXT_PUBLIC_TALLY}/proposal/${report.proposalId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        View on Tally
-                      </Button>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline">View All Reports</Button>
-          <Link
-            href={`/create/${data?.id}/${data?.hatId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button>Create New Report</Button>
-          </Link>
-        </CardFooter>
-      </Card>
-    </div>
-  );
+              <Button>Create New Report</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 }
