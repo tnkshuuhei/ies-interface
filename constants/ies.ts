@@ -1,4 +1,4 @@
-const address: `0x${string}` = "0x5E59338e169fAa9b83920c44B1c5f29617258C9F";
+const address: `0x${string}` = "0x015D80494c64cBD575f6D72e6b84f9e17b24bca3";
 const abi = [
   {
     inputs: [
@@ -395,7 +395,7 @@ const abi = [
       { internalType: "string", name: "_imageURL", type: "string" },
       { internalType: "string", name: "_reportMetadata", type: "string" },
       { internalType: "string[]", name: "_links", type: "string[]" },
-      { internalType: "address", name: "_proposor", type: "address" },
+      { internalType: "address", name: "_proposer", type: "address" },
       { internalType: "bytes[]", name: "_roleData", type: "bytes[]" },
     ],
     name: "createReport",
