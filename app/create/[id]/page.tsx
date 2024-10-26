@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ethers, isAddress } from "ethers";
+import { Loader2 } from "lucide-react";
 import { Upload, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
+import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { z } from "zod";
 
@@ -107,6 +110,8 @@ export default function Register({ params }: { params: { id: string } }) {
   // Add state for role images
   const [roleImages, setRoleImages] = useState<Record<number, RoleImage>>({});
 
+  const router = useRouter();
+
   const account = useAccount();
   const AbiCoder = new ethers.AbiCoder();
   const {
@@ -116,8 +121,16 @@ export default function Register({ params }: { params: { id: string } }) {
     isCreated,
     IsErrorCreated,
   } = useIES();
-  const { approve, isApproving, isApproved, IsErrorApproved, approveHash } =
-    useVotingToken();
+  const {
+    approve,
+    isApproving,
+    isApproved,
+    IsErrorApproved,
+    approveHash,
+    allowance,
+  } = useVotingToken();
+  const allowanceAvailable =
+    allowance && allowance.data ? BigInt(allowance.data as bigint) : BigInt(0);
 
   useEffect(() => {
     if (isCreated) {
@@ -137,6 +150,7 @@ export default function Register({ params }: { params: { id: string } }) {
           </ToastAction>
         ),
       });
+      
     } else if (IsErrorCreated) {
       toast({
         variant: "destructive",
@@ -353,8 +367,6 @@ export default function Register({ params }: { params: { id: string } }) {
       });
 
       const encoded = await encodedRoles(rolesCopy);
-
-      await approve(ies.address, "1000");
 
       const mappingContributors = data.contributors.map(
         (contributor) => contributor.address
@@ -712,19 +724,42 @@ export default function Register({ params }: { params: { id: string } }) {
                 Add Role
               </Button>
             </div>
-
+            {parseUnits("1000", 18) > allowanceAvailable && (
+              <Button
+                type="button"
+                className="w-full"
+                disabled={!account.isConnected || isApproving}
+                onClick={() => approve(ies.address, "1000")}
+              >
+                {isApproving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span>approving...</span>
+                  </>
+                ) : (
+                  "Approve 1000 VOTE Token"
+                )}
+              </Button>
+            )}
             <Button
               type="submit"
               className="w-full"
               disabled={
                 isLoading ||
                 !account.isConnected ||
-                !image ||
                 isApproving ||
-                isCreating
+                isCreating ||
+                parseUnits("1000", 18) > allowanceAvailable
               }
             >
-              {isLoading ? "Creating..." : "Create Impact Report"}
+              {isCreating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Creating Impact Report...</span>
+                </>
+              ) : (
+                "Create Impact Report"
+              )}
             </Button>
           </form>
         </Form>

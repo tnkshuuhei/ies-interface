@@ -1,14 +1,31 @@
 import { parseUnits } from "viem";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useReadContract,
+  useAccount,
+} from "wagmi";
 
 import { useToast } from "@/components/ui/use-toast";
 
+import { ies } from "@/constants/ies";
 import { tokenConfig } from "@/constants/token";
 
 export function useVotingToken() {
   const { toast } = useToast();
+  const account = useAccount();
   const { data: approveHash, writeContractAsync: writeApprove } =
     useWriteContract();
+
+  const allowance = useReadContract({
+    address: tokenConfig.address,
+    abi: tokenConfig.abi,
+    functionName: "allowance",
+    args: [account.address!, ies.address!],
+    query: {
+      refetchInterval: 1000,
+    },
+  });
 
   async function approve(to: `0x${string}`, amount: string) {
     const approvalAmount = parseUnits(amount, tokenConfig.decimals);
@@ -52,5 +69,6 @@ export function useVotingToken() {
     isApproved,
     IsErrorApproved,
     approveHash,
+    allowance,
   };
 }
