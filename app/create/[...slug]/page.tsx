@@ -13,11 +13,13 @@ import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { z } from "zod";
 
+import ENSResolverInput from "@/components/ENSResolverInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -418,9 +420,7 @@ export default function Register({ params }: { params: { slug: string[] } }) {
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Create Impact Report</CardTitle>
-      </CardHeader>
+      <CardHeader></CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -433,7 +433,7 @@ export default function Register({ params }: { params: { slug: string[] } }) {
                     <input
                       {...field}
                       placeholder="Enter title..."
-                      className="w-full text-4xl font-bold border-none outline-none bg-transparent mb-4"
+                      className="w-full lg:text-3xl text-xl lg:font-bold font-semibold border-none outline-none bg-transparent mb-4"
                     />
                   </FormControl>
                   <FormMessage />
@@ -452,7 +452,7 @@ export default function Register({ params }: { params: { slug: string[] } }) {
                         <TabsTrigger value="preview">Preview</TabsTrigger>
                       </TabsList>
                     </div>
-
+                    <FormDescription>Markdown is supported :) </FormDescription>
                     <TabsContent value="edit">
                       <FormControl>
                         <Textarea
@@ -478,18 +478,21 @@ export default function Register({ params }: { params: { slug: string[] } }) {
 
             <div className="space-y-4">
               <Label>Contributors</Label>
+              <FormDescription>
+                All contributors will have a opportunity to recieve a share of
+                the retroactive rewards if the proposal is approved. A share is
+                represented as a Liquid Split Token(ERC1155)
+              </FormDescription>
               {contributorFields.map((field, index) => (
                 <div key={field.id} className="flex gap-2">
                   <FormField
                     control={form.control}
                     name={`contributors.${index}.address`}
                     render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input {...field} placeholder="0x..." />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      <ENSResolverInput
+                        field={field}
+                        placeholder="0x... or ENS name"
+                      />
                     )}
                   />
                   {index > 0 && (
@@ -504,6 +507,7 @@ export default function Register({ params }: { params: { slug: string[] } }) {
                   )}
                 </div>
               ))}
+
               <Button
                 type="button"
                 variant="outline"
@@ -592,6 +596,10 @@ export default function Register({ params }: { params: { slug: string[] } }) {
 
             <div className="space-y-4">
               <Label>Roles</Label>
+              <FormDescription>
+                Role is to clarify the roles of the people involved in preparing
+                this report. Each Role is displayed on the Hats tree.
+              </FormDescription>
               {roleFields.map((field, roleIndex) => (
                 <div key={field.id} className="space-y-4 p-4 border rounded-lg">
                   <FormField
@@ -633,15 +641,10 @@ export default function Register({ params }: { params: { slug: string[] } }) {
                               control={form.control}
                               name={`roles.${roleIndex}.wearers.${wearerIndex}`}
                               render={({ field }) => (
-                                <FormItem className="flex-1">
-                                  <FormControl>
-                                    <Input
-                                      {...field}
-                                      placeholder="Wearer address (0x...)"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
+                                <ENSResolverInput
+                                  field={field}
+                                  placeholder="Wearer address (0x...) or ENS name"
+                                />
                               )}
                             />
                             {wearerIndex > 0 && (
@@ -668,6 +671,7 @@ export default function Register({ params }: { params: { slug: string[] } }) {
                             )}
                           </div>
                         ))}
+
                       <Button
                         type="button"
                         variant="outline"
