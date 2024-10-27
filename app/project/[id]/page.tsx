@@ -1,6 +1,11 @@
 "use client";
 import React from "react";
 
+import {
+  hatIdDecimalToHex,
+  hatIdDecimalToIp,
+  hatIdToTreeId,
+} from "@hatsprotocol/sdk-v1-core";
 import { useQuery } from "@tanstack/react-query";
 import { gql, request } from "graphql-request";
 import { ExternalLink, FileText } from "lucide-react";
@@ -22,8 +27,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { ENSResolver } from "@/lib/ens";
 import { fetchIPFSDATA, formatBlockTimestamp, sliceAddress } from "@/utils";
-import { ENDPOINT, profileQuery, reportQuery } from "@/utils/query";
-import { Profile, ProfileData, ReportData, Reports } from "@/utils/types";
+import {
+  ENDPOINT,
+  initializedQuery,
+  profileQuery,
+  reportQuery,
+} from "@/utils/query";
+import {
+  InitializedData,
+  Profile,
+  ProfileData,
+  ReportData,
+  Reports,
+} from "@/utils/types";
 
 export default function ProjectDetailPage({
   params,
@@ -33,6 +49,29 @@ export default function ProjectDetailPage({
   };
 }) {
   const resolver = new ENSResolver();
+  const [topHatTreeId, setTopHatTreeId] = React.useState<number>(0);
+  const [hatIdIp, setHatIdIp] = React.useState<string>("");
+
+  const {
+    data: initilizedData,
+    isLoading: initializedLoading,
+    error: initializedError,
+  } = useQuery({
+    queryKey: ["initialized"],
+    queryFn: async (): Promise<InitializedData> => {
+      try {
+        return await request(ENDPOINT, initializedQuery).then((res: any) => {
+          const treeId = hatIdToTreeId(BigInt(res.initializeds[0]?.topHatId!));
+          setTopHatTreeId(treeId);
+
+          return res.initializeds[0];
+        });
+      } catch (error) {
+        console.error(error);
+        throw new Error("Error fetching initialized data");
+      }
+    },
+  });
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["profile", params.id],
@@ -50,6 +89,9 @@ export default function ProjectDetailPage({
         const ownerENS = await resolver.resolveAddress(
           res.profileCreated.owner
         );
+
+        const hatIdIp = hatIdDecimalToIp(BigInt(res.profileCreated.hatId));
+        setHatIdIp(hatIdIp);
 
         newData = {
           ...res.profileCreated,
@@ -166,7 +208,7 @@ export default function ProjectDetailPage({
             <div className="flex justify-between items-center">
               <CardTitle>{data?.hatsData?.data?.name}</CardTitle>
               <a
-                href={`${process.env.NEXT_PUBLIC_HATS_URL!}`}
+                href={`https://app.hatsprotocol.xyz/trees/11155111/${topHatTreeId}/?hatId=${hatIdIp}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

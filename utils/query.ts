@@ -32,4 +32,21 @@ export const profileQuery = gql`
     }
   }
 `;
+export const initializedQuery = gql`
+  query GetInitialized {
+    initializeds {
+      id
+      owner
+      treasury
+      governor
+      token
+      schemaUID
+      topHatId
+      blockNumber
+      blockTimestamp
+      transactionHash
+    }
+  }
+`;
+
 export const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT!;

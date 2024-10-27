@@ -3,8 +3,10 @@ import "../app/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import React from "react";
 
+import { HatsClient } from "@hatsprotocol/sdk-v1-core";
 import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { getPublicClient } from "@wagmi/core";
 import { WagmiProvider, http } from "wagmi";
 import { sepolia } from "wagmi/chains";
 
@@ -20,6 +22,11 @@ const config = getDefaultConfig({
   ssr: true,
 });
 const client = new QueryClient();
+
+const hatsClient = new HatsClient({
+  chainId: sepolia.id,
+  publicClient: getPublicClient(config),
+});
 
 export default function ContextProvider({
   children,

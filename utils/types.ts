@@ -85,3 +85,16 @@ export interface RoleImage {
   preview: string;
   name: string;
 }
+
+export interface InitializedData {
+  id: string;
+	owner: string;
+	treasury: string;
+	governor: string;
+	token: string;
+	schemaUID: string;
+	topHatId: string;
+	blockNumber: string;
+	blockTimestamp: string;
+	transactionHash: string;
+}
