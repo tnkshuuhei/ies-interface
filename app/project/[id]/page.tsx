@@ -279,7 +279,7 @@ export default function ProjectDetailPage({
               <div className="flex items-center space-x-4">
                 <Avatar>
                   <AvatarImage
-                    src={data?.avatar || "https://picsum.photos/200/200"}
+                    src={data?.avatar || "/default-avatar.svg"}
                     alt="Author"
                   />
                   <AvatarFallback></AvatarFallback>
