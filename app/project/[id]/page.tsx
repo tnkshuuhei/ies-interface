@@ -338,9 +338,14 @@ export default function ProjectDetailPage({
                             <div className="flex items-center space-x-3">
                               <FileText className="h-5 w-5 text-muted-foreground" />
                               <div>
+                                <p className="text-sm font-medium">
+                                  {report?.rawReportData?.name}
+                                </p>
                                 <div className="flex items-center gap-2">
-                                  <p className="text-sm font-medium">
-                                    {report?.rawReportData?.name}
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatBlockTimestamp(
+                                      report?.blockTimestamp
+                                    )}
                                   </p>
                                   {proposalStatus && (
                                     <Badge
@@ -351,9 +356,6 @@ export default function ProjectDetailPage({
                                     </Badge>
                                   )}
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                  {formatBlockTimestamp(report?.blockTimestamp)}
-                                </p>
                               </div>
                             </div>
                             <a
