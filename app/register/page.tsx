@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 
@@ -169,11 +170,11 @@ export default function CreateReportPage() {
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <div>
-                      <Input {...field} />
+                      <Textarea {...field} />
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Enter project description up to 100 characters
+                    Enter project description up to 1000 characters
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

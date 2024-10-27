@@ -11,8 +11,23 @@ export type HatsMetadata = {
 };
 
 export const projectSchema = z.object({
-  name: z.string(),
-  description: z.string().max(100),
+  name: z
+    .string()
+    .min(1, {
+      message: "Name must be at least 1 character long",
+    })
+    .max(20, {
+      message: "Name must be less than 20 characters long",
+    }),
+
+  description: z
+    .string()
+    .min(10, {
+      message: "Description must be at least 10 characters long",
+    })
+    .max(1000, {
+      message: "Description must be less than 1000 characters long",
+    }),
 });
 export type Project = z.infer<typeof projectSchema>;
 
@@ -88,13 +103,13 @@ export interface RoleImage {
 
 export interface InitializedData {
   id: string;
-	owner: string;
-	treasury: string;
-	governor: string;
-	token: string;
-	schemaUID: string;
-	topHatId: string;
-	blockNumber: string;
-	blockTimestamp: string;
-	transactionHash: string;
+  owner: string;
+  treasury: string;
+  governor: string;
+  token: string;
+  schemaUID: string;
+  topHatId: string;
+  blockNumber: string;
+  blockTimestamp: string;
+  transactionHash: string;
 }
