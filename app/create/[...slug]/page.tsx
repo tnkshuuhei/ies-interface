@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import DOMPurify from "dompurify";
 import { ethers, isAddress } from "ethers";
 import { Loader2 } from "lucide-react";
 import { Upload, Plus, Trash2 } from "lucide-react";
@@ -64,14 +65,9 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function Register({ params }: { params: { slug: string[] } }) {
-  marked.setOptions({
-    gfm: true,
-    breaks: true,
-  });
-
   const id = params.slug[0];
   const hatsId = params.slug[1];
-
+  const [safeHtmlContent, setSafeHtmlContent] = useState<string>("");
   const [imageName, setImageName] = useState<string | null>(null);
   const [image, setImage] = useState<string | undefined>(undefined);
   const [file, setFile] = useState<File | undefined>(undefined);
@@ -158,22 +154,22 @@ export default function Register({ params }: { params: { slug: string[] } }) {
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    // defaultValues: defaultValues,
-    defaultValues: {
-      name: "",
-      description: "",
-      contributors: [{ address: account.address as `0x${string}` }],
-      links: [{ url: "" }],
-      roles: [
-        {
-          parentHatId: hatsId,
-          name: "",
-          description: "",
-          wearers: [account.address as `0x${string}`],
-          imageUrl: "",
-        },
-      ],
-    },
+    defaultValues: defaultValues,
+    // defaultValues: {
+    //   name: "",
+    //   description: "",
+    //   contributors: [{ address: account.address as `0x${string}` }],
+    //   links: [{ url: "" }],
+    //   roles: [
+    //     {
+    //       parentHatId: hatsId,
+    //       name: "",
+    //       description: "",
+    //       wearers: [account.address as `0x${string}`],
+    //       imageUrl: "",
+    //     },
+    //   ],
+    // },
   });
 
   const {
@@ -385,7 +381,40 @@ export default function Register({ params }: { params: { slug: string[] } }) {
       setIsLoading(false);
     }
   }
-  const htmlText = marked(form.getValues("description"));
+  marked.setOptions({
+    gfm: true,
+    breaks: true,
+  });
+
+  const description = form.watch("description");
+  useEffect(() => {
+    async function sanitizeHtml() {
+      const rawHtml = await marked(description || "");
+      const sanitizedHtml = DOMPurify.sanitize(rawHtml, {
+        ALLOWED_TAGS: [
+          "h1",
+          "h2",
+          "h3",
+          "h4",
+          "h5",
+          "h6",
+          "p",
+          "a",
+          "ul",
+          "ol",
+          "li",
+          "strong",
+          "em",
+          "code",
+          "pre",
+          "blockquote",
+        ],
+        ALLOWED_ATTR: ["href"],
+      });
+      setSafeHtmlContent(sanitizedHtml);
+    }
+    sanitizeHtml();
+  }, [description]);
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -436,8 +465,9 @@ export default function Register({ params }: { params: { slug: string[] } }) {
 
                     <TabsContent value="preview" className="min-h-[400px]">
                       <article className="prose lg:prose-lg p-4">
-                        <div dangerouslySetInnerHTML={{ __html: htmlText }} />
-                        {/* TODO: XSS */}
+                        <div
+                          dangerouslySetInnerHTML={{ __html: safeHtmlContent }}
+                        />
                       </article>
                     </TabsContent>
                   </Tabs>
