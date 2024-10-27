@@ -45,6 +45,7 @@ export default function ProjectCard({
       }
     },
     enabled: !!hatId,
+    refetchInterval: 100,
   });
   return (
     <div className="w-lg rounded-[15px] bg-white cursor-pointer shadow-lg">

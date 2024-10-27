@@ -133,6 +133,7 @@ export default function ProjectDetailPage({
       }
     },
     enabled: !!data?.hatId,
+    refetchInterval: 100,
   });
 
   const proposalQueries = useQueries({

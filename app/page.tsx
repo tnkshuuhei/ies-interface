@@ -59,7 +59,7 @@ export default function Home() {
         throw new Error("Error fetching profiles");
       }
     },
-    refetchInterval: 10000,
+    refetchInterval: 100,
   });
 
   if (isLoadingProfiles) {
