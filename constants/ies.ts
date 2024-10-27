@@ -1,4 +1,4 @@
-const address: `0x${string}` = "0x015D80494c64cBD575f6D72e6b84f9e17b24bca3";
+const address: `0x${string}` = "0x9ff98Fd9711e1d5A065146079FB04db3b3f29789";
 const abi = [
   {
     inputs: [
@@ -7,11 +7,7 @@ const abi = [
       { internalType: "address", name: "_gonernor", type: "address" },
       { internalType: "address", name: "_token", type: "address" },
       { internalType: "address", name: "_eas", type: "address" },
-      {
-        internalType: "address",
-        name: "_schemaRegistry",
-        type: "address",
-      },
+      { internalType: "address", name: "_schemaRegistry", type: "address" },
       { internalType: "address", name: "_hats", type: "address" },
       { internalType: "string", name: "_imageURL", type: "string" },
       { internalType: "address", name: "_splitsToken", type: "address" },
@@ -29,22 +25,33 @@ const abi = [
     name: "AccessControlUnauthorizedAccount",
     type: "error",
   },
-  { inputs: [], name: "INVALID", type: "error" },
-  { inputs: [], name: "MISMATCH", type: "error" },
+  { inputs: [], name: "DATA_MISMATCH", type: "error" },
+  { inputs: [], name: "EMPTY_ROLE_IMAGE_URL", type: "error" },
+  { inputs: [], name: "EMPTY_ROLE_METADATA", type: "error" },
+  { inputs: [], name: "EMPTY_ROLE_WEARERS", type: "error" },
+  { inputs: [], name: "EVALUATION_CONTRACT_MISMATCH", type: "error" },
+  { inputs: [], name: "EVALUATION_INIT_FAILED", type: "error" },
+  { inputs: [], name: "INSUFFICIENT_FUNDS", type: "error" },
+  { inputs: [], name: "INVALID_INPUT", type: "error" },
+  { inputs: [], name: "INVALID_PROJECT_OWNER", type: "error" },
+  { inputs: [], name: "INVALID_PROJECT_REGISTRATION", type: "error" },
+  { inputs: [], name: "INVALID_REPORT_CREATION", type: "error" },
+  { inputs: [], name: "INVALID_ROLE_DATA", type: "error" },
   { inputs: [], name: "NON_ZERO_VALUE", type: "error" },
-  { inputs: [], name: "NOT_ENOUGH_FUNDS", type: "error" },
   { inputs: [], name: "NOT_IMPLEMENTED", type: "error" },
+  { inputs: [], name: "NO_CONTRIBUTORS", type: "error" },
+  { inputs: [], name: "POOL_ID_MISMATCH", type: "error" },
+  {
+    inputs: [{ internalType: "uint256", name: "poolId", type: "uint256" }],
+    name: "POOL_NOT_INITIALIZED",
+    type: "error",
+  },
   { inputs: [], name: "UNAUTHORIZED", type: "error" },
   { inputs: [], name: "ZERO_ADDRESS", type: "error" },
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "id",
-        type: "uint256",
-      },
+      { indexed: true, internalType: "uint256", name: "id", type: "uint256" },
       {
         indexed: true,
         internalType: "address",
@@ -151,12 +158,7 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "id",
-        type: "uint256",
-      },
+      { indexed: true, internalType: "uint256", name: "id", type: "uint256" },
       {
         indexed: false,
         internalType: "uint256",
@@ -170,24 +172,14 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "id",
-        type: "bytes32",
-      },
+      { indexed: true, internalType: "bytes32", name: "id", type: "bytes32" },
       {
         indexed: false,
         internalType: "uint256",
         name: "hatId",
         type: "uint256",
       },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "name",
-        type: "string",
-      },
+      { indexed: false, internalType: "string", name: "name", type: "string" },
       {
         indexed: false,
         internalType: "string",
@@ -213,12 +205,7 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
+      { indexed: true, internalType: "bytes32", name: "role", type: "bytes32" },
       {
         indexed: true,
         internalType: "bytes32",
@@ -281,12 +268,7 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
+      { indexed: true, internalType: "bytes32", name: "role", type: "bytes32" },
       {
         indexed: true,
         internalType: "address",
@@ -306,12 +288,7 @@ const abi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
+      { indexed: true, internalType: "bytes32", name: "role", type: "bytes32" },
       {
         indexed: true,
         internalType: "address",
@@ -358,20 +335,14 @@ const abi = [
   {
     inputs: [
       { internalType: "bytes32", name: "profileId", type: "bytes32" },
-      {
-        internalType: "address[]",
-        name: "contributors",
-        type: "address[]",
-      },
+      { internalType: "address[]", name: "contributors", type: "address[]" },
       { internalType: "string", name: "description", type: "string" },
       { internalType: "string", name: "metadataUID", type: "string" },
       { internalType: "address", name: "proposer", type: "address" },
       { internalType: "string[]", name: "links", type: "string[]" },
     ],
     name: "attest",
-    outputs: [
-      { internalType: "bytes32", name: "attestationUID", type: "bytes32" },
-    ],
+    outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -385,11 +356,7 @@ const abi = [
   {
     inputs: [
       { internalType: "uint256", name: "_hatId", type: "uint256" },
-      {
-        internalType: "address[]",
-        name: "_contributors",
-        type: "address[]",
-      },
+      { internalType: "address[]", name: "_contributors", type: "address[]" },
       { internalType: "string", name: "_title", type: "string" },
       { internalType: "string", name: "_description", type: "string" },
       { internalType: "string", name: "_imageURL", type: "string" },
@@ -550,11 +517,7 @@ const abi = [
   {
     inputs: [
       { internalType: "bytes32", name: "role", type: "bytes32" },
-      {
-        internalType: "address",
-        name: "callerConfirmation",
-        type: "address",
-      },
+      { internalType: "address", name: "callerConfirmation", type: "address" },
     ],
     name: "renounceRole",
     outputs: [],
@@ -565,11 +528,7 @@ const abi = [
     inputs: [],
     name: "resolver",
     outputs: [
-      {
-        internalType: "contract AttesterResolver",
-        name: "",
-        type: "address",
-      },
+      { internalType: "contract AttesterResolver", name: "", type: "address" },
     ],
     stateMutability: "view",
     type: "function",
@@ -621,11 +580,7 @@ const abi = [
   },
   {
     inputs: [
-      {
-        internalType: "address payable",
-        name: "_treasury",
-        type: "address",
-      },
+      { internalType: "address payable", name: "_treasury", type: "address" },
     ],
     name: "updateTreasury",
     outputs: [],
@@ -636,11 +591,7 @@ const abi = [
     inputs: [],
     name: "voteToken",
     outputs: [
-      {
-        internalType: "contract VotingIESToken",
-        name: "",
-        type: "address",
-      },
+      { internalType: "contract VotingIESToken", name: "", type: "address" },
     ],
     stateMutability: "view",
     type: "function",
