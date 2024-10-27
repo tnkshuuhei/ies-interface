@@ -4,9 +4,15 @@ interface Props {
   file: File;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
+  message?: string;
 }
 
-export async function pinToPinata({ file, isLoading, setIsLoading }: Props) {
+export async function pinToPinata({
+  file,
+  isLoading,
+  setIsLoading,
+  message,
+}: Props) {
   try {
     setIsLoading(true);
     toast({ title: "Uploading to IPFS" });

@@ -88,11 +88,17 @@ export default function CreateReportPage() {
       file: metadataFile,
       isLoading: isLoading,
       setIsLoading: setIsLoading,
+      message: "Uploading project metadata to IPFS",
     });
 
     console.log("✅ Project CID", projectCID);
 
-    const imageCID = await pinToPinata({ file, isLoading, setIsLoading });
+    const imageCID = await pinToPinata({
+      file,
+      isLoading,
+      setIsLoading,
+      message: "Uploading cover image to IPFS",
+    });
     console.log("✅ Image CID", imageCID);
 
     registerIES(

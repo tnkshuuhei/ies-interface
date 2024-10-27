@@ -79,3 +79,9 @@ export interface ReportData {
 export interface Profiles {
   profileCreateds: ProjectCardProps[];
 }
+
+export interface RoleImage {
+  file: File;
+  preview: string;
+  name: string;
+}

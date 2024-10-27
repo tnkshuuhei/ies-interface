@@ -31,15 +31,9 @@ import { ies } from "@/constants/ies";
 import { useIES } from "@/hooks/useIES";
 import { useVotingToken } from "@/hooks/useVotingToken";
 import { readAsBase64 } from "@/utils";
+import { defaultValues } from "@/utils/mock";
 import { pinToPinata } from "@/utils/pinata";
-import { HatsMetadata } from "@/utils/types";
-
-// Add interface for role images
-interface RoleImage {
-  file: File;
-  preview: string;
-  name: string;
-}
+import { HatsMetadata, RoleImage } from "@/utils/types";
 
 const Address = z.custom<string>(isAddress, "Invalid Address");
 
@@ -67,42 +61,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const defaultValues: FormData = {
-  name: "# Protcol Guild Impact Report.",
-  description:
-    "## Protocol Guild has distributed more than 33M dollars to Ethereum Core Developers and Researchers.",
-  contributors: [
-    { address: "0xc3593524E2744E547f013E17E6b0776Bc27Fc614" },
-    {
-      address: "0x63b1EfC5602C0023BBb373F2350Cf34c2E5F8669",
-    },
-  ],
-  links: [{ url: "https://dune.com/protocolguild/protocol-guild" }],
-  roles: [
-    {
-      parentHatId:
-        "16796047185010987922379060937955525549013567220926743064122515022413824",
-      name: "Developer",
-      description: "Developers are responsible for building the protocol.",
-      wearers: ["0xc3593524E2744E547f013E17E6b0776Bc27Fc614" as `0x${string}`],
-      imageUrl: "ipfs://QmRZ9ULzLKC1uzAvLyxAAhYoXyQMS413zPviGLu6vG4Bzw",
-    },
-    {
-      parentHatId:
-        "16796047185010987922379060937955525549013567220926743064122515022413824",
-      name: "Researcher",
-      description: "Researchers are responsible for researching the protocol.",
-      wearers: [
-        "0xc3593524E2744E547f013E17E6b0776Bc27Fc614",
-        "0x63b1EfC5602C0023BBb373F2350Cf34c2E5F8669",
-      ],
-      imageUrl: "ipfs://QmTRGCnTfwHhyr64aSNZqpP68ABFNQu9W9TJZEo4vL3FRu",
-    },
-  ],
-};
-
 export default function Register({ params }: { params: { slug: string[] } }) {
-  console.log("params", params);
   const id = params.slug[0];
   const hatsId = params.slug[1];
 
@@ -111,7 +70,6 @@ export default function Register({ params }: { params: { slug: string[] } }) {
   const [file, setFile] = useState<File | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Add state for role images
   const [roleImages, setRoleImages] = useState<Record<number, RoleImage>>({});
 
   const router = useRouter();
@@ -193,22 +151,21 @@ export default function Register({ params }: { params: { slug: string[] } }) {
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    // defaultValues: {
-    //   name: "",
-    //   description: "",
-    //   contributors: [{ address: account.address as `0x${string}` }],
-    //   links: [{ url: "" }],
-    //   roles: [
-    //     {
-    //       parentHatId: hatsId,
-    //       name: "",
-    //       description: "",
-    //       wearers: [account.address as `0x${string}`],
-    //       imageUrl: "",
-    //     },
-    //   ],
-    // },
-    defaultValues: defaultValues,
+    defaultValues: {
+      name: "",
+      description: "",
+      contributors: [{ address: account.address as `0x${string}` }],
+      links: [{ url: "" }],
+      roles: [
+        {
+          parentHatId: hatsId,
+          name: "",
+          description: "",
+          wearers: [account.address as `0x${string}`],
+          imageUrl: "",
+        },
+      ],
+    },
   });
 
   const {
@@ -290,7 +247,9 @@ export default function Register({ params }: { params: { slug: string[] } }) {
         file: metadataFile,
         isLoading,
         setIsLoading,
+        message: "Uploading role metadata to IPFS",
       });
+      console.log("✅ Role CID", metadataCID);
       return AbiCoder.encode(
         ["tuple(uint256,string,string,string,address[],string)"],
         [
@@ -330,7 +289,14 @@ export default function Register({ params }: { params: { slug: string[] } }) {
 
       setIsLoading(true);
 
-      const imageCID = await pinToPinata({ file, isLoading, setIsLoading });
+      const imageCID = await pinToPinata({
+        file,
+        isLoading,
+        setIsLoading,
+        message: "Uploading cover image to IPFS",
+      });
+      console.log("✅ cover image CID", imageCID);
+
       const imageUrl = `ipfs://${imageCID}`;
 
       // Upload role images and get their CIDs
@@ -342,7 +308,9 @@ export default function Register({ params }: { params: { slug: string[] } }) {
             file: roleImage.file,
             isLoading,
             setIsLoading,
+            message: `Uploading role image ${i} to IPFS`,
           });
+          console.log(`✅ role ${i} image CID`, roleCID);
           rolesCopy[i] = {
             ...rolesCopy[i],
             imageUrl: `ipfs://${roleCID}`,
@@ -368,7 +336,9 @@ export default function Register({ params }: { params: { slug: string[] } }) {
         file: metadataFile,
         isLoading,
         setIsLoading,
+        message: "Uploading report data to IPFS",
       });
+      console.log("✅ report metadata CID", metadataCID);
 
       const encoded = await encodedRoles(rolesCopy);
 
