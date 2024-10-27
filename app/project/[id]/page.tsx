@@ -89,6 +89,7 @@ export default function ProjectDetailPage({
         const ownerENS = await resolver.resolveAddress(
           res.profileCreated.owner
         );
+        const avatar = await resolver.resolveENSAvatar(ownerENS!);
 
         const hatIdIp = hatIdDecimalToIp(BigInt(res.profileCreated.hatId));
         setHatIdIp(hatIdIp);
@@ -98,6 +99,7 @@ export default function ProjectDetailPage({
           imageURL: imageCID,
           hatsData: data,
           ownerENS: ownerENS,
+          avatar: avatar,
         };
         return newData;
       } catch (error) {
@@ -277,7 +279,7 @@ export default function ProjectDetailPage({
               <div className="flex items-center space-x-4">
                 <Avatar>
                   <AvatarImage
-                    src="https://picsum.photos/500/300"
+                    src={data?.avatar || "https://picsum.photos/200/200"}
                     alt="Author"
                   />
                   <AvatarFallback></AvatarFallback>
@@ -310,7 +312,7 @@ export default function ProjectDetailPage({
               <div>
                 <h3 className="text-lg font-semibold">Project Description</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {data?.hatsData.data.description}
+                  {data?.hatsData?.data?.description}
                 </p>
               </div>
 

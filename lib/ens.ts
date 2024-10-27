@@ -4,6 +4,7 @@ import {
   getEnsAddress,
   Config,
   getEnsName,
+  getEnsAvatar,
 } from "@wagmi/core";
 import { mainnet } from "@wagmi/core/chains";
 import { normalize } from "viem/ens";
@@ -18,6 +19,16 @@ export class ENSResolver {
         [mainnet.id]: http(),
       },
     });
+  }
+
+  async resolveENSAvatar(name: string) {
+    const ensAvatar = await getEnsAvatar(this.config, {
+      assetGatewayUrls: {
+        ipfs: "https://ipfs.io/",
+      },
+      name: normalize(name),
+    });
+    return ensAvatar;
   }
 
   async resolveName(address: string): Promise<string | null> {

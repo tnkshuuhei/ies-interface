@@ -62,6 +62,7 @@ export interface ProfileData {
   blockTimestamp: string;
   transactionHash: string;
   ownerENS?: any;
+  avatar?: any;
 }
 
 export interface Reports {
