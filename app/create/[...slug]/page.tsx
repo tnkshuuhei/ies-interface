@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ethers, isAddress } from "ethers";
 import { Loader2 } from "lucide-react";
 import { Upload, Plus, Trash2 } from "lucide-react";
+import { marked } from "marked";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import { parseUnits } from "viem";
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
@@ -62,6 +64,11 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function Register({ params }: { params: { slug: string[] } }) {
+  marked.setOptions({
+    gfm: true,
+    breaks: true,
+  });
+
   const id = params.slug[0];
   const hatsId = params.slug[1];
 
@@ -151,6 +158,7 @@ export default function Register({ params }: { params: { slug: string[] } }) {
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    // defaultValues: defaultValues,
     defaultValues: {
       name: "",
       description: "",
@@ -289,6 +297,13 @@ export default function Register({ params }: { params: { slug: string[] } }) {
 
       setIsLoading(true);
 
+      // Format description with links
+      const formattedDescription = `${
+        data.description
+      }\n\n## Evidence Links\n${data.links
+        .map((link, index) => `${index + 1}. ${link.url}`)
+        .join("\n")}`;
+
       const imageCID = await pinToPinata({
         file,
         isLoading,
@@ -322,7 +337,7 @@ export default function Register({ params }: { params: { slug: string[] } }) {
         name: data.name,
         description: data.description,
         image: imageUrl,
-        contributors: data.contributors,
+        contributors: formattedDescription,
         links: data.links,
         roles: rolesCopy,
       };
@@ -352,7 +367,7 @@ export default function Register({ params }: { params: { slug: string[] } }) {
         BigInt(hatsId),
         mappingContributors,
         data.name,
-        data.description,
+        formattedDescription,
         imageUrl,
         metadataCID,
         mappingLinks,
@@ -370,6 +385,7 @@ export default function Register({ params }: { params: { slug: string[] } }) {
       setIsLoading(false);
     }
   }
+  const htmlText = marked(form.getValues("description"));
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -384,24 +400,47 @@ export default function Register({ params }: { params: { slug: string[] } }) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <input
+                      {...field}
+                      placeholder="Enter title..."
+                      className="w-full text-4xl font-bold border-none outline-none bg-transparent mb-4"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
+                  <Tabs defaultValue="edit" className="w-full">
+                    <div className="flex justify-center mb-4">
+                      <TabsList>
+                        <TabsTrigger value="edit">Edit</TabsTrigger>
+                        <TabsTrigger value="preview">Preview</TabsTrigger>
+                      </TabsList>
+                    </div>
+
+                    <TabsContent value="edit">
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          className="min-h-[400px] p-4 text-lg"
+                          placeholder="# Write your content here..."
+                        />
+                      </FormControl>
+                    </TabsContent>
+
+                    <TabsContent value="preview" className="min-h-[400px]">
+                      <article className="prose lg:prose-lg p-4">
+                        <div dangerouslySetInnerHTML={{ __html: htmlText }} />
+                        {/* TODO: XSS */}
+                      </article>
+                    </TabsContent>
+                  </Tabs>
                   <FormMessage />
                 </FormItem>
               )}
