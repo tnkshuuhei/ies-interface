@@ -1,18 +1,15 @@
 "use client";
 import React from "react";
 
-import {
-  hatIdDecimalToHex,
-  hatIdDecimalToIp,
-  hatIdToTreeId,
-} from "@hatsprotocol/sdk-v1-core";
-import { useQuery } from "@tanstack/react-query";
-import { gql, request } from "graphql-request";
+import { hatIdDecimalToIp, hatIdToTreeId } from "@hatsprotocol/sdk-v1-core";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { request } from "graphql-request";
 import { ExternalLink, FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,12 +23,19 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { ENSResolver } from "@/lib/ens";
-import { fetchIPFSDATA, formatBlockTimestamp, sliceAddress } from "@/utils";
+import {
+  fetchIPFSDATA,
+  formatBlockTimestamp,
+  getStatusColor,
+  sliceAddress,
+} from "@/utils";
 import {
   ENDPOINT,
   initializedQuery,
   profileQuery,
+  PROPOSAL_STATUS_QUERY,
   reportQuery,
+  TALLY_API_ENDPOINT,
 } from "@/utils/query";
 import {
   InitializedData,
@@ -52,11 +56,7 @@ export default function ProjectDetailPage({
   const [topHatTreeId, setTopHatTreeId] = React.useState<number>(0);
   const [hatIdIp, setHatIdIp] = React.useState<string>("");
 
-  const {
-    data: initilizedData,
-    isLoading: initializedLoading,
-    error: initializedError,
-  } = useQuery({
+  const { data: initilizedData } = useQuery({
     queryKey: ["initialized"],
     queryFn: async (): Promise<InitializedData> => {
       try {
@@ -133,6 +133,54 @@ export default function ProjectDetailPage({
       }
     },
     enabled: !!data?.hatId,
+  });
+
+  const proposalQueries = useQueries({
+    queries: (reportData ?? []).map((report) => ({
+      queryKey: ["proposal", report.proposalId],
+      queryFn: async () => {
+        try {
+          const response = await fetch(TALLY_API_ENDPOINT, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Api-key": process.env.NEXT_PUBLIC_TALLY_API_KEY as string,
+            },
+            body: JSON.stringify({
+              query: PROPOSAL_STATUS_QUERY,
+              variables: {
+                input: {
+                  onchainId: report.proposalId,
+                  governorId: `eip155:11155111:${initilizedData?.governor}`,
+                  includeArchived: true,
+                  isLatest: true,
+                },
+              },
+            }),
+          });
+
+          const data = await response.json();
+
+          if (data.errors) {
+            console.error("GraphQL Errors:", data.errors);
+            throw new Error(data.errors[0].message);
+          }
+
+          return data.data.proposal;
+        } catch (error) {
+          console.error(
+            "Error fetching proposal status for proposalId:",
+            report.proposalId,
+            {
+              error,
+              message: error instanceof Error ? error.message : "Unknown error",
+            }
+          );
+          throw error;
+        }
+      },
+      enabled: !!report.proposalId && !!initilizedData?.governor,
+    })),
   });
 
   if (reportLoading || isLoading || !reportData || !data) {
@@ -276,38 +324,52 @@ export default function ProjectDetailPage({
                     </p>
                   ) : (
                     <>
-                      {reportData?.map((report) => (
-                        <li
-                          key={report.id}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <FileText className="h-5 w-5 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium">
-                                {report?.rawReportData?.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatBlockTimestamp(report?.blockTimestamp)}
-                              </p>
-                            </div>
-                          </div>
-                          <a
-                            href={`https://www.tally.xyz/gov/${process.env.NEXT_PUBLIC_TALLY}/proposal/${report?.proposalId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                      {reportData?.map((report, index) => {
+                        const proposalStatus =
+                          proposalQueries[index]?.data?.status;
+                        return (
+                          <li
+                            key={report.id}
+                            className="flex items-center justify-between border rounded-lg p-4"
                           >
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex items-center gap-2"
+                            <div className="flex items-center space-x-3">
+                              <FileText className="h-5 w-5 text-muted-foreground" />
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-medium">
+                                    {report?.rawReportData?.name}
+                                  </p>
+                                  {proposalStatus && (
+                                    <Badge
+                                      variant="outline"
+                                      className={getStatusColor(proposalStatus)}
+                                    >
+                                      {proposalStatus.toLowerCase()}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatBlockTimestamp(report?.blockTimestamp)}
+                                </p>
+                              </div>
+                            </div>
+                            <a
+                              href={`https://www.tally.xyz/gov/${process.env.NEXT_PUBLIC_TALLY}/proposal/${report?.proposalId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
                             >
-                              <ExternalLink className="h-4 w-4" />
-                              View on Tally
-                            </Button>
-                          </a>
-                        </li>
-                      ))}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-2"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                View on Tally
+                              </Button>
+                            </a>
+                          </li>
+                        );
+                      })}
                     </>
                   )}
                 </ul>

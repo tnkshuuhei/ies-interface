@@ -49,4 +49,24 @@ export const initializedQuery = gql`
   }
 `;
 
+export const PROPOSAL_STATUS_QUERY = `
+  query Proposal($input: ProposalInput!) {
+    proposal(input: $input) {
+      id
+      status
+      metadata {
+        title
+        description
+      }
+      voteStats {
+        type
+        votesCount
+        votersCount
+        percent
+      }
+    }
+  }
+`;
+
 export const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT!;
+export const TALLY_API_ENDPOINT = "https://api.tally.xyz/query";
