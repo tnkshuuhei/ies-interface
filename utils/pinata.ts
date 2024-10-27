@@ -15,7 +15,7 @@ export async function pinToPinata({
 }: Props) {
   try {
     setIsLoading(true);
-    toast({ title: "Uploading to IPFS" });
+    toast({ title: message || "Uploading to IPFS" });
     const formData = new FormData();
     formData.append("file", file);
 
