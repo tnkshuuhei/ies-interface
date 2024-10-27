@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Upload } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
@@ -210,7 +210,14 @@ export default function CreateReportPage() {
               className="w-full"
               disabled={isRegistering || !account.isConnected || !image}
             >
-              Submit
+              {isRegistering ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Creating Impact Report...</span>
+                </>
+              ) : (
+                <span>Register Project</span>
+              )}
             </Button>
           </form>
         </Form>
