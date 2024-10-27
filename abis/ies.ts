@@ -1,4 +1,4 @@
-const address: `0x${string}` = "0x9ff98Fd9711e1d5A065146079FB04db3b3f29789";
+const address: `0x${string}` = "0xCE409480a92444df96b3B83B6441b08ba7c27ec1";
 const abi = [
   {
     inputs: [
@@ -25,25 +25,43 @@ const abi = [
     name: "AccessControlUnauthorizedAccount",
     type: "error",
   },
+  {
+    inputs: [{ internalType: "address", name: "target", type: "address" }],
+    name: "AddressEmptyCode",
+    type: "error",
+  },
+  {
+    inputs: [{ internalType: "address", name: "account", type: "address" }],
+    name: "AddressInsufficientBalance",
+    type: "error",
+  },
   { inputs: [], name: "DATA_MISMATCH", type: "error" },
   { inputs: [], name: "EMPTY_ROLE_IMAGE_URL", type: "error" },
   { inputs: [], name: "EMPTY_ROLE_METADATA", type: "error" },
   { inputs: [], name: "EMPTY_ROLE_WEARERS", type: "error" },
   { inputs: [], name: "EVALUATION_CONTRACT_MISMATCH", type: "error" },
   { inputs: [], name: "EVALUATION_INIT_FAILED", type: "error" },
+  { inputs: [], name: "FailedInnerCall", type: "error" },
   { inputs: [], name: "INSUFFICIENT_FUNDS", type: "error" },
+  { inputs: [], name: "INVALID_ADMIN", type: "error" },
   { inputs: [], name: "INVALID_INPUT", type: "error" },
   { inputs: [], name: "INVALID_PROJECT_OWNER", type: "error" },
   { inputs: [], name: "INVALID_PROJECT_REGISTRATION", type: "error" },
   { inputs: [], name: "INVALID_REPORT_CREATION", type: "error" },
   { inputs: [], name: "INVALID_ROLE_DATA", type: "error" },
   { inputs: [], name: "NON_ZERO_VALUE", type: "error" },
+  { inputs: [], name: "NOT_GOVERNOR", type: "error" },
   { inputs: [], name: "NOT_IMPLEMENTED", type: "error" },
   { inputs: [], name: "NO_CONTRIBUTORS", type: "error" },
   { inputs: [], name: "POOL_ID_MISMATCH", type: "error" },
   {
     inputs: [{ internalType: "uint256", name: "poolId", type: "uint256" }],
     name: "POOL_NOT_INITIALIZED",
+    type: "error",
+  },
+  {
+    inputs: [{ internalType: "address", name: "token", type: "address" }],
+    name: "SafeERC20FailedOperation",
     type: "error",
   },
   { inputs: [], name: "UNAUTHORIZED", type: "error" },
