@@ -27,7 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 
-import { ies } from "@/constants/ies";
+import { ies } from "@/abis/ies";
 import { useIES } from "@/hooks/useIES";
 import { useVotingToken } from "@/hooks/useVotingToken";
 import { readAsBase64 } from "@/utils";

@@ -2,7 +2,7 @@ import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 import { useToast } from "@/components/ui/use-toast";
 
-import { ies } from "@/constants/ies";
+import { ies } from "@/abis/ies";
 import { Project } from "@/utils/types";
 
 export function useIES() {

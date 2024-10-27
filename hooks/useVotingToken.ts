@@ -8,8 +8,8 @@ import {
 
 import { useToast } from "@/components/ui/use-toast";
 
-import { ies } from "@/constants/ies";
-import { tokenConfig } from "@/constants/token";
+import { ies } from "@/abis/ies";
+import { tokenConfig } from "@/abis/token";
 
 export function useVotingToken() {
   const { toast } = useToast();
