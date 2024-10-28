@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Menu, X } from "lucide-react";
+import { ExternalLink, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -74,9 +74,15 @@ const Header = () => {
                 <Link
                   href={item.href}
                   target={item.newTab ? "_blank" : ""}
+                  rel={item.newTab ? "noopener noreferrer" : ""}
                   className="text-gray-700 hover:text-primary-700 transition-colors duration-200"
                 >
-                  {item.label}
+                  <div className="flex flex-row items-center">
+                    {item.label}
+                    {item.newTab && (
+                      <ExternalLink size={16} className="inline-block ml-1" />
+                    )}
+                  </div>
                 </Link>
               </li>
             ))}
@@ -101,7 +107,12 @@ const Header = () => {
                   className="block text-gray-700 hover:text-primary-700 transition-colors duration-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {item.label}
+                  <div className="flex flex-row items-center">
+                    {item.label}
+                    {item.newTab && (
+                      <ExternalLink size={16} className="inline-block ml-1" />
+                    )}
+                  </div>
                 </Link>
               </li>
             ))}
