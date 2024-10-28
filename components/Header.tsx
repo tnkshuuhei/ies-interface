@@ -16,6 +16,11 @@ const Header = () => {
   const menuItems = [
     { href: "/register", label: "Register" },
     {
+      href: `https://www.tally.xyz/gov/${process.env.NEXT_PUBLIC_TALLY}/`,
+      label: "Governance",
+      newTab: true,
+    },
+    {
       href: "https://app.splits.org/accounts/0xd492DF1E59a3e14C986E3b5C00F8f2762AbE0BEF/?chainId=11155111",
       label: "Liquid Splits",
       newTab: true,
